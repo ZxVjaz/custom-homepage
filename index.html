@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="author" content="Volodymyr Pivoshenko (https://github.com/pivoshenko)" />
+  <!-- CSS files will be loaded by JavaScript based on configuration -->
+  <link href="src/css/style.css" rel="stylesheet" type="text/css" />
+  <link href="src/css/tabler-icons.min.css" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="src/img/favicon.png" />
+  <title>~/.config</title>
+</head>
+
+<body>
+  <tabs-list></tabs-list>
+
+  <script type="text/javascript" src="src/common/palette.js"></script>
+  <script type="text/javascript" src="src/common/utils.js"></script>
+  <script type="text/javascript" src="src/common/storage.js"></script>
+  <script type="text/javascript" src="src/common/actions.js"></script>
+  <script type="text/javascript" src="src/common/config.js"></script>
+  <script type="text/javascript" src="src/common/strftime.js"></script>
+  <script type="text/javascript" src="src/common/theme.js"></script>
+  <script type="text/javascript" src="src/common/component.js"></script>
+
+  <script type="text/javascript" src="./userconfig.js"></script>
+
+  <script type="text/javascript">
+    function loadFonts() {
+      const head = document.getElementsByTagName('head')[0];
+
+      if (CONFIG.localFonts) {
+        // Load local awoo CSS (without Google Fonts import)
+        const awooLink = document.createElement('link');
+        awooLink.rel = 'stylesheet';
+        awooLink.type = 'text/css';
+        awooLink.href = 'src/css/awoo-local.min.css';
+        head.appendChild(awooLink);
+
+        const localFontLinks = [
+          'src/fonts/roboto-local.css',
+          'src/fonts/nunito-local.css',
+          'src/fonts/raleway-local.css',
+          'src/fonts/material-icons-local.css'
+        ];
+
+        localFontLinks.forEach(href => {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.type = 'text/css';
+          link.href = href;
+          head.appendChild(link);
+        });
+      } else {
+        // Load standard awoo CSS (with Google Fonts import)
+        const awooLink = document.createElement('link');
+        awooLink.rel = 'stylesheet';
+        awooLink.type = 'text/css';
+        awooLink.href = 'src/css/awoo.min.css';
+        head.appendChild(awooLink);
+
+        const googleFontLinks = [
+          'https://fonts.googleapis.com/css?family=Nunito:200|Roboto:100,400,700|Raleway:600',
+          'https://fonts.googleapis.com/icon?family=Material+Icons'
+        ];
+
+        googleFontLinks.forEach(href => {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.type = 'text/css';
+          link.href = href;
+          head.appendChild(link);
+        });
+      }
+    }
+
+    // Load fonts after CONFIG is available
+    loadFonts();
+  </script>
+
+  <script type="text/javascript" src="src/components/tabs/tabs.component.js"></script>
+
+  <script type="text/javascript" src="src/components/weather/weather.api.js"></script>
+  <script type="text/javascript" src="src/components/weather/weather.component.js"></script>
+
+  <script type="text/javascript" src="src/components/clock/clock.component.js"></script>
+
+  <script type="text/javascript" src="src/components/statusbar/statusbar.component.js"></script>
+
+  <script type="text/javascript" src="src/components/search/search.component.js"></script>
+
+  <script type="text/javascript" src="src/common/module.js"></script>
+</body>
+
+</html>
