@@ -1,4 +1,4 @@
-﻿// User configuration for the startpage - update the palette, location, and your preferred tabs, categories, and links
+// User configuration for the startpage - update the palette, location, and your preferred tabs, categories, and links
 
 // Available themes: latte, frappe, mocha, macchiato
 const preferredLightTheme = latte;
