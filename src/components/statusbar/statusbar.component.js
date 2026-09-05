@@ -1,4 +1,4 @@
-
+﻿
 // Statusbar component for tab navigation and widgets
 class Statusbar extends Component {
   externalRefs = {};
@@ -258,8 +258,9 @@ class Statusbar extends Component {
    * Opens the last visited tab from localStorage
    */
   openLastVisitedTab() {
-    if (!CONFIG.openLastVisitedTab) return;
-    this.activateByKey(localStorage.lastVisitedTab);
+    if (!CONFIG.openLastVisitedTab || localStorage.lastVisitedTab === undefined) return;
+    const tabIndex = parseInt(localStorage.lastVisitedTab);
+    if (!isNaN(tabIndex)) this.activateByKey(tabIndex);
   }
 
   /**
