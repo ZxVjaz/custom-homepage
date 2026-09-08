@@ -1,4 +1,4 @@
-// Switches between the light and dark themes based on the system preference
+﻿// Switches between the light and dark themes based on the system preference
 // Exports functions to detect that preference and react when it changes
 
 /**
@@ -31,7 +31,23 @@ function initThemeListener(lightTheme, darkTheme, onThemeChange) {
       onThemeChange(newTheme);
     });
   }
-}
+
+/**
+ * Resolve theme objects accounting for any saved GUI preferences
+ * @param {Object} lightTheme - Default light theme
+ * @param {Object} darkTheme - Default dark theme
+ * @returns {{light: Object, dark: Object}} Resolved themes
+ */
+function resolveConfiguredThemes(lightTheme, darkTheme) {
+  const themesMap = { latte, frappe, macchiato, mocha };
+  const savedLight = localStorage.getItem('preferredLightTheme');
+  const savedDark = localStorage.getItem('preferredDarkTheme');
+
+  return {
+    light: savedLight && themesMap[savedLight] ? themesMap[savedLight] : lightTheme,
+    dark: savedDark && themesMap[savedDark] ? themesMap[savedDark] : darkTheme,
+  };
+}}
 
 /**
  * Initialise the theme system and keep it in sync with the system preference
