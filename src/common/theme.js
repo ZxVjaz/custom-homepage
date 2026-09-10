@@ -1,4 +1,4 @@
-﻿// Switches between the light and dark themes based on the system preference
+// Switches between the light and dark themes based on the system preference
 // Exports functions to detect that preference and react when it changes
 
 /**
@@ -31,6 +31,7 @@ function initThemeListener(lightTheme, darkTheme, onThemeChange) {
       onThemeChange(newTheme);
     });
   }
+}
 
 /**
  * Resolve theme objects accounting for any saved GUI preferences
@@ -47,7 +48,7 @@ function resolveConfiguredThemes(lightTheme, darkTheme) {
     light: savedLight && themesMap[savedLight] ? themesMap[savedLight] : lightTheme,
     dark: savedDark && themesMap[savedDark] ? themesMap[savedDark] : darkTheme,
   };
-}}
+}
 
 /**
  * Initialise the theme system and keep it in sync with the system preference
@@ -57,13 +58,14 @@ function resolveConfiguredThemes(lightTheme, darkTheme) {
  * @returns {Object} The current theme based on system preference
  */
 function initThemeSystem(lightTheme, darkTheme, onThemeChange = null) {
-  const initialTheme = getSystemTheme(lightTheme, darkTheme);
+  const resolved = resolveConfiguredThemes(lightTheme, darkTheme);
+  const initialTheme = getSystemTheme(resolved.light, resolved.dark);
 
   // Set up listener with default page reload if no callback provided
   if (onThemeChange) {
-    initThemeListener(lightTheme, darkTheme, onThemeChange);
+    initThemeListener(resolved.light, resolved.dark, onThemeChange);
   } else {
-    initThemeListener(lightTheme, darkTheme, () => {
+    initThemeListener(resolved.light, resolved.dark, () => {
       window.location.reload();
     });
   }
