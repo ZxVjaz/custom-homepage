@@ -1,4 +1,4 @@
-class Config {
+﻿class Config {
   // Default configuration values for the startpage - these can be overridden by user configuration or local storage
   defaults = {
     overrideStorage: false,
@@ -111,6 +111,9 @@ class Config {
    * @returns {boolean} Whether the setting can override storage
    */
   canOverrideStorage(setting) {
+    if (localStorage.getItem("guiModified") === "true") {
+      return false;
+    }
     return setting in this.config && (this.config.overrideStorage || setting === "tabs");
   }
 
