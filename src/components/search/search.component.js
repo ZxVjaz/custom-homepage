@@ -242,6 +242,13 @@ class Search extends Component {
     if (key === 'Enter') {
       const fullInput = target.value.trim();
 
+      if (fullInput === ':settings') {
+        this.deactivate();
+        target.value = '';
+        Actions.activate('settings-modal');
+        return;
+      }
+
       if (this.isValidUrl(fullInput)) {
         window.location = this.formatUrl(fullInput);
         return;
