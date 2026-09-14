@@ -272,6 +272,24 @@ class Statusbar extends Component {
   }
 
   /**
+   * Checks if any modal or overlay (e.g. settings modal or search) is currently active
+   * @returns {boolean} True if a modal or overlay is open
+   */
+  isModalActive() {
+    const settingsModal = document.querySelector('settings-modal');
+    if (settingsModal && (settingsModal.hasAttribute('active') || settingsModal.shadowRoot?.querySelector('#settings-modal.active'))) {
+      return true;
+    }
+
+    const searchBar = document.querySelector('search-bar');
+    if (searchBar && searchBar.shadowRoot?.querySelector('#search.active')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Handles mouse wheel scrolling for tab navigation
    * @param {WheelEvent} event - The wheel event object
    */
