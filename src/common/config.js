@@ -1,4 +1,4 @@
-﻿class Config {
+class Config {
   // Default configuration values for the startpage - these can be overridden by user configuration or local storage
   defaults = {
     overrideStorage: false,
@@ -135,6 +135,11 @@
   setKeybindings() {
     document.addEventListener("keydown", ({ key }) => {
       if (document.activeElement !== document.body) return;
+
+      const settingsModal = document.querySelector("settings-modal");
+      if (settingsModal && (settingsModal.hasAttribute("active") || settingsModal.shadowRoot?.querySelector("#settings-modal.active"))) {
+        return;
+      }
 
       if (key in this.keybindings) Actions.activate(this.keybindings[key]);
     });

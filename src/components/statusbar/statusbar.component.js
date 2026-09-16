@@ -1,4 +1,4 @@
-﻿
+
 // Statusbar component for tab navigation and widgets
 class Statusbar extends Component {
   externalRefs = {};
@@ -295,6 +295,7 @@ class Statusbar extends Component {
    */
   handleWheelScroll(event) {
     if (!event) return;
+    if (this.isModalActive()) return;
 
     let { target, wheelDelta } = event;
 
@@ -320,6 +321,7 @@ class Statusbar extends Component {
    */
   handleKeyPress(event) {
     if (!event) return;
+    if (this.isModalActive()) return;
 
     let { target, key } = event;
 
