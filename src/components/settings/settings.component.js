@@ -1699,4 +1699,704 @@ class Settings extends Component {
               <!-- Tab 4: Backup & Sync -->
               <div class="tab-panel" id="tab-backup">
                 <div class="section-title"><i class="ti ti-database"></i> Backup & Sync</div>
+                <div class="section-desc">Export or import configuration backups (JSON), or restore defaults.</div>
+
+                <div class="card">
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                    <div>
+                      <div class="form-label" style="font-size: 14px; margin-bottom: 4px;">Export Backup (JSON)</div>
+                      <div class="form-hint">Export your personalised bookmarks and settings as a portable JSON backup file.</div>
+                    </div>
+                    <button class="btn btn-secondary" id="btn-export-json">
+                      <i class="ti ti-file-export"></i> Export JSON
+                    </button>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                    <div>
+                      <div class="form-label" style="font-size: 14px; margin-bottom: 4px;">Import Configuration (JS / JSON)</div>
+                      <div class="form-hint">Load configuration from a userconfig.js file or a previously saved JSON file.</div>
+                    </div>
+                    <div>
+                      <input type="file" id="file-import-input" accept=".js,.json" style="display: none;">
+                      <button class="btn btn-secondary" id="btn-trigger-import">
+                        <i class="ti ti-upload"></i> Choose File
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card" style="border-color: ${p.red}40;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                    <div>
+                      <div class="form-label" style="font-size: 14px; color: ${p.red}; margin-bottom: 4px;">Reset to Default userconfig.js</div>
+                      <div class="form-hint">Clear local browser storage and restore configuration from the project's userconfig.js file.</div>
+                    </div>
+                    <button class="btn btn-danger" id="btn-reset-default">
+                      <i class="ti ti-refresh"></i> Reset to Default
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="modal-footer">
+            <button class="btn btn-secondary" id="btn-footer-close">
+              <i class="ti ti-x"></i> Close (Esc)
+            </button>
+            <button class="btn btn-primary" id="btn-save">
+              <i class="ti ti-device-floppy"></i> Save & Reload
+            </button>
+          </div>
+
+          <!-- Confirmation Sub-Modal -->
+          <div id="confirm-modal">
+            <div class="confirm-dialog">
+              <i class="ti ti-alert-triangle confirm-icon" id="confirm-icon"></i>
+              <div class="confirm-title" id="confirm-title">Confirm Action</div>
+              <div class="confirm-message" id="confirm-message">Are you sure you want to proceed?</div>
+              <div class="confirm-actions">
+                <button class="btn btn-secondary" id="btn-confirm-cancel">Cancel</button>
+                <button class="btn btn-danger" id="btn-confirm-ok">Confirm</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- In-App Toast Notification -->
+        <div id="settings-toast" class="toast-success">
+          <i class="ti ti-check" id="toast-icon"></i>
+          <span id="toast-message">Settings saved successfully!</span>
+        </div>
+      </div>
+    `;
+  }
+
+  showToast(message, type = 'success') {
+    const toast = this.refs.toast;
+    const msgElem = toast.querySelector('#toast-message');
+    const iconElem = toast.querySelector('#toast-icon');
+
+    msgElem.textContent = message;
+    toast.className = `toast-${type}`;
+
+    if (type === 'error') {
+      iconElem.className = 'ti ti-alert-circle';
+    } else if (type === 'info') {
+      iconElem.className = 'ti ti-info-circle';
+    } else {
+      iconElem.className = 'ti ti-check';
+    }
+
+    toast.classList.add('show');
+    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+    this.toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  showConfirmModal({ title, message, confirmText = 'Confirm', confirmType = 'danger' }) {
+    return new Promise((resolve) => {
+      const modal = this.shadow.querySelector('#confirm-modal');
+      const titleEl = modal.querySelector('#confirm-title');
+      const msgEl = modal.querySelector('#confirm-message');
+      const okBtn = modal.querySelector('#btn-confirm-ok');
+      const cancelBtn = modal.querySelector('#btn-confirm-cancel');
+
+      titleEl.textContent = title || 'Confirm Action';
+      msgEl.textContent = message;
+      okBtn.textContent = confirmText;
+      okBtn.className = `btn btn-${confirmType}`;
+
+      modal.classList.add('active');
+
+      const cleanup = () => {
+        modal.classList.remove('active');
+        okBtn.onclick = null;
+        cancelBtn.onclick = null;
+      };
+
+      okBtn.onclick = () => {
+        cleanup();
+        resolve(true);
+      };
+
+      cancelBtn.onclick = () => {
+        cleanup();
+        resolve(false);
+      };
+    });
+  }
+
+  activate() {
+    this.setAttribute('active', '');
+    this.draftConfig = JSON.parse(JSON.stringify(CONFIG));
+    this.draftLight = localStorage.getItem('preferredLightTheme') || 'latte';
+    this.draftDark = localStorage.getItem('preferredDarkTheme') || 'mocha';
+
+    this.populateGeneralForm();
+    this.populateWeatherClockForm();
+    this.renderBookmarksTree();
+
+    this.refs.modal.classList.add('active');
+
+    // Bind Escape key listener: cancel confirm dialog first if active, close open dropdowns, otherwise close modal
+    this.escapeHandler = (e) => {
+      if (e.key === 'Escape') {
+        const confirmModal = this.shadow.querySelector('#confirm-modal');
+        if (confirmModal && confirmModal.classList.contains('active')) {
+          this.shadow.querySelector('#btn-confirm-cancel').click();
+          return;
+        }
+        const openDropdown = this.shadow.querySelector('.custom-dropdown.open');
+        if (openDropdown) {
+          this.closeAllDropdowns();
+          return;
+        }
+        const comboboxDropdown = this.shadow.querySelector('.combobox-dropdown.open');
+        if (comboboxDropdown) {
+          comboboxDropdown.classList.remove('open');
+          const toggleBtn = this.shadow.querySelector('#combobox-toggle-btn');
+          if (toggleBtn) toggleBtn.classList.remove('open');
+          return;
+        }
+        this.deactivate();
+      }
+    };
+    window.addEventListener('keydown', this.escapeHandler);
+  }
+
+  deactivate() {
+    this.removeAttribute('active');
+    this.refs.modal.classList.remove('active');
+
+    if (this.escapeHandler) {
+      window.removeEventListener('keydown', this.escapeHandler);
+      this.escapeHandler = null;
+    }
+  }
+
+  setDropdownValue(id, value) {
+    const shadow = this.shadow;
+    const wrap = shadow.querySelector(`.custom-dropdown[data-id="${id}"]`);
+    if (!wrap) return;
+
+    const input = wrap.querySelector(`#${id}`);
+    if (input) input.value = value;
+
+    const items = wrap.querySelectorAll('.dropdown-item');
+    let matchedItem = null;
+    items.forEach(it => {
+      if (it.dataset.value === value) {
+        it.classList.add('selected');
+        matchedItem = it;
+      } else {
+        it.classList.remove('selected');
+      }
+    });
+
+    const display = wrap.querySelector('.dropdown-selected-content');
+    if (matchedItem) {
+      const leftContent = matchedItem.querySelector('.dropdown-item-left');
+      if (display && leftContent) {
+        display.innerHTML = leftContent.innerHTML;
+      }
+    } else if (display) {
+      display.innerHTML = `<span>${escapeHtml(value)}</span>`;
+    }
+  }
+
+  populateGeneralForm() {
+    const shadow = this.shadow;
+    this.setDropdownValue('gen-theme-light', this.draftLight);
+    this.setDropdownValue('gen-theme-dark', this.draftDark);
+    shadow.querySelector('#gen-fastlink').value = this.draftConfig.fastlink || '';
+    this.setDropdownValue('gen-search-default', this.draftConfig.search?.default || 'd');
+  }
+
+  populateWeatherClockForm() {
+    const shadow = this.shadow;
+    const disabled = this.draftConfig.disabled || [];
+
+    const weatherEnabled = !disabled.includes('weather-forecast');
+    shadow.querySelector('#weather-enabled').checked = weatherEnabled;
+    const weatherControls = shadow.querySelector('#weather-controls');
+    if (weatherControls) weatherControls.style.display = weatherEnabled ? 'block' : 'none';
+
+    shadow.querySelector('#weather-location').value = this.draftConfig.temperature?.location || 'London';
+    this.setDropdownValue('weather-scale', this.draftConfig.temperature?.scale || 'C');
+    shadow.querySelector('#weather-appid').value = this.draftConfig.temperature?.appId || '';
+
+    const clockEnabled = !disabled.includes('current-time');
+    shadow.querySelector('#clock-enabled').checked = clockEnabled;
+    const clockControls = shadow.querySelector('#clock-controls');
+    if (clockControls) clockControls.style.display = clockEnabled ? 'block' : 'none';
+
+    this.setDropdownValue('clock-format', this.draftConfig.clock?.format || 'k:i p');
+
+    this.renderAdditionalClocks();
+  }
+
+  renderAdditionalClocks() {
+    const container = this.shadow.querySelector('#additional-clocks-container');
+    const clocks = this.draftConfig.additionalClocks || [];
+
+    if (clocks.length === 0) {
+      container.innerHTML = `<div style="font-size: 13px; color: ${CONFIG.palette.overlay0}; padding: 8px 0;">No additional timezone clocks configured.</div>`;
+      return;
+    }
+
+    const TIMEZONES = [
+      { tz: 'UTC', label: 'UTC (Coordinated Universal Time)' },
+      { tz: 'Europe/London', label: 'London, UK (GMT/BST - UTC+0)' },
+      { tz: 'Europe/Paris', label: 'Paris, France (CET - UTC+1)' },
+      { tz: 'Europe/Berlin', label: 'Berlin, Germany (CET - UTC+1)' },
+      { tz: 'Europe/Kyiv', label: 'Kyiv, Ukraine (EET - UTC+2)' },
+      { tz: 'Europe/Moscow', label: 'Moscow, Russia (MSK - UTC+3)' },
+      { tz: 'Asia/Dubai', label: 'Dubai, UAE (GST - UTC+4)' },
+      { tz: 'Asia/Kolkata', label: 'New Delhi, India (IST - UTC+5:30)' },
+      { tz: 'Asia/Jakarta', label: 'Jakarta, Bangkok (WIB - UTC+7)' },
+      { tz: 'Asia/Makassar', label: 'Makassar, Bali (WITA - UTC+8)' },
+      { tz: 'Asia/Jayapura', label: 'Jayapura, Papua (WIT - UTC+9)' },
+      { tz: 'Asia/Singapore', label: 'Singapore, KL (SGT - UTC+8)' },
+      { tz: 'Asia/Hong_Kong', label: 'Hong Kong, Beijing (HKT - UTC+8)' },
+      { tz: 'Asia/Tokyo', label: 'Tokyo, Japan (JST - UTC+9)' },
+      { tz: 'Asia/Seoul', label: 'Seoul, Korea (KST - UTC+9)' },
+      { tz: 'Australia/Sydney', label: 'Sydney, Melbourne (AEST - UTC+10)' },
+      { tz: 'Pacific/Auckland', label: 'Auckland, NZ (NZST - UTC+12)' },
+      { tz: 'America/New_York', label: 'New York, Toronto (EST - UTC-5)' },
+      { tz: 'America/Chicago', label: 'Chicago, Mexico (CST - UTC-6)' },
+      { tz: 'America/Denver', label: 'Denver, Calgary (MST - UTC-7)' },
+      { tz: 'America/Los_Angeles', label: 'Los Angeles, SF (PST - UTC-8)' },
+      { tz: 'America/Sao_Paulo', label: 'São Paulo, Brazil (BRT - UTC-3)' },
+    ];
+
+    container.innerHTML = clocks.map((clk, idx) => {
+      const hasCustom = clk.timezone && !TIMEZONES.some(t => t.tz === clk.timezone);
+      const tzOptionsHtml = (hasCustom ? `<option value="${escapeHtml(clk.timezone)}" selected>${escapeHtml(clk.timezone)} (Custom)</option>` : '') +
+        TIMEZONES.map(t => `<option value="${t.tz}" ${clk.timezone === t.tz ? 'selected' : ''}>${t.label}</option>`).join('');
+
+      return `
+        <div class="card" style="margin-bottom: 10px; padding: 12px 16px;">
+          <div style="display: grid; grid-template-columns: 90px 1.2fr 1fr 34px; gap: 10px; align-items: center;">
+            <input type="text" class="form-input clk-label" data-idx="${idx}" value="${escapeHtml(clk.label || '')}" placeholder="Label (UA)">
+            <select class="form-select clk-tz" data-idx="${idx}">
+              ${tzOptionsHtml}
+            </select>
+            <select class="form-select clk-fmt" data-idx="${idx}">
+              <option value="k:i p" ${clk.format === 'k:i p' ? 'selected' : ''}>12-hour AM/PM (02:30 PM)</option>
+              <option value="K:i p" ${clk.format === 'K:i p' ? 'selected' : ''}>12-hour without leading zero (2:30 PM)</option>
+              <option value="h:i" ${clk.format === 'h:i' ? 'selected' : ''}>24-hour (14:30)</option>
+              <option value="H:i" ${clk.format === 'H:i' ? 'selected' : ''}>24-hour without leading zero (14:30)</option>
+              <option value="k:i:s p" ${clk.format === 'k:i:s p' ? 'selected' : ''}>12-hour with Seconds</option>
+              <option value="h:i:s" ${clk.format === 'h:i:s' ? 'selected' : ''}>24-hour with Seconds</option>
+            </select>
+            <button class="btn btn-danger btn-icon-only btn-del-clock" data-idx="${idx}" title="Delete Clock">
+              <i class="ti ti-trash"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Event listeners for clock inputs
+    container.querySelectorAll('.clk-label').forEach(el => {
+      el.oninput = (e) => { clocks[e.target.dataset.idx].label = e.target.value; };
+    });
+    container.querySelectorAll('.clk-tz').forEach(el => {
+      el.onchange = (e) => { clocks[e.target.dataset.idx].timezone = e.target.value; };
+    });
+    container.querySelectorAll('.clk-fmt').forEach(el => {
+      el.onchange = (e) => { clocks[e.target.dataset.idx].format = e.target.value; };
+    });
+    container.querySelectorAll('.btn-del-clock').forEach(el => {
+      el.onclick = (e) => {
+        const btn = e.target.closest('.btn-del-clock');
+        const idx = parseInt(btn.dataset.idx);
+        clocks.splice(idx, 1);
+        this.renderAdditionalClocks();
+      };
+    });
+  }
+
+  renderBookmarksTree() {
+    const container = this.shadow.querySelector('#bookmarks-tree-container');
+    const tabs = this.draftConfig.tabs || [];
+
+    if (tabs.length === 0) {
+      container.innerHTML = `<div style="font-size: 13px; color: ${CONFIG.palette.overlay0};">No bookmark tabs found.</div>`;
+      return;
+    }
+
+    container.innerHTML = tabs.map((tab, tIdx) => `
+      <div class="tree-tab-card" data-tidx="${tIdx}">
+        <div class="tree-tab-header">
+          <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+            <i class="ti ti-folder" style="font-size: 18px; color: ${CONFIG.palette.peach};"></i>
+            <input type="text" class="form-input tab-name-input" data-tidx="${tIdx}" value="${escapeHtml(tab.name || '')}" placeholder="Tab Name (e.g. myself)" style="width: 150px;">
+            <input type="text" class="form-input tab-bg-input" data-tidx="${tIdx}" value="${escapeHtml(tab.background_url || '')}" placeholder="Banner URL (e.g. src/img/banners/banner_01.gif)" style="flex: 1;">
+          </div>
+          <button class="btn btn-danger btn-sm btn-del-tab" data-tidx="${tIdx}">
+            <i class="ti ti-trash"></i> Delete Tab
+          </button>
+        </div>
+
+        <div class="tree-tab-body">
+          ${(tab.categories || []).map((cat, cIdx) => `
+            <div class="tree-cat-card" data-tidx="${tIdx}" data-cidx="${cIdx}">
+              <div class="tree-cat-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i class="ti ti-category" style="color: ${CONFIG.palette.blue};"></i>
+                  <input type="text" class="form-input cat-name-input" data-tidx="${tIdx}" data-cidx="${cIdx}" value="${escapeHtml(cat.name || '')}" placeholder="Category Name (e.g. workspace)" style="width: 180px;">
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <button class="btn btn-secondary btn-sm btn-add-link" data-tidx="${tIdx}" data-cidx="${cIdx}">
+                    <i class="ti ti-plus"></i> Add Link
+                  </button>
+                  <button class="btn btn-danger btn-sm btn-del-cat" data-tidx="${tIdx}" data-cidx="${cIdx}">
+                    <i class="ti ti-trash"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Links -->
+              <div class="links-list-container">
+                ${(cat.links || []).map((link, lIdx) => {
+                  const iconName = link.icon || 'link';
+                  const selectedCol = resolveColourKey(link.icon_color);
+                  const selectedHex = CONFIG.palette[selectedCol] || CONFIG.palette.text;
+                  const iconColour = link.icon_color || selectedHex;
+                  return `
+                    <div class="link-item-row" data-tidx="${tIdx}" data-cidx="${cIdx}" data-lidx="${lIdx}">
+                      <input type="text" class="form-input link-name-input" value="${escapeHtml(link.name || '')}" placeholder="Link Name" data-tidx="${tIdx}" data-cidx="${cIdx}" data-lidx="${lIdx}">
+                      <input type="text" class="form-input link-url-input" value="${escapeHtml(link.url || '')}" placeholder="URL (https://...)" data-tidx="${tIdx}" data-cidx="${cIdx}" data-lidx="${lIdx}">
+
+                      <!-- Icon input with live preview -->
+                      <div class="icon-preview-box">
+                        <i class="ti ti-${escapeHtml(iconName)} icon-preview-display" id="icon-preview-${tIdx}-${cIdx}-${lIdx}" style="color: ${iconColour};"></i>
+                        <input type="text" class="form-input link-icon-input" value="${escapeHtml(link.icon || '')}" placeholder="Icon (droplet)" data-tidx="${tIdx}" data-cidx="${cIdx}" data-lidx="${lIdx}">
+                      </div>
+
+                      <!-- Icon colour custom dropdown -->
+                      <div class="custom-dropdown color-dropdown" data-id="link-color-${tIdx}-${cIdx}-${lIdx}">
+                        <input type="hidden" id="link-color-${tIdx}-${cIdx}-${lIdx}" class="link-color-input" data-tidx="${tIdx}" data-cidx="${cIdx}" data-lidx="${lIdx}" value="palette.${selectedCol}">
+                        <button type="button" class="dropdown-trigger" aria-haspopup="listbox" aria-expanded="false" title="Select icon colour">
+                          <span class="dropdown-selected-content">
+                            <span class="color-dot" style="background: ${selectedHex}; box-shadow: 0 0 5px ${selectedHex}50;"></span>
+                            <span>${capitalizeFirst(selectedCol)}</span>
+                          </span>
+                          <i class="ti ti-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                          ${CATPPUCCIN_ACCENTS.map(col => {
+                            const isSel = col === selectedCol;
+                            const colHex = CONFIG.palette[col] || '#89b4fa';
+                            return `
+                              <div class="dropdown-item ${isSel ? 'selected' : ''}" data-value="palette.${col}">
+                                <div class="dropdown-item-left">
+                                  <span class="color-dot" style="background: ${colHex}; box-shadow: 0 0 4px ${colHex}50;"></span>
+                                  <span>${capitalizeFirst(col)}</span>
+                                </div>
+                                <div class="dropdown-item-right">
+                                  <i class="ti ti-check dropdown-check"></i>
+                                </div>
+                              </div>
+                            `;
+                          }).join('')}
+                        </div>
+                      </div>
+
+                      <button class="btn btn-danger btn-icon-only btn-del-link" data-tidx="${tIdx}" data-cidx="${cIdx}" data-lidx="${lIdx}" title="Delete Link">
+                        <i class="ti ti-trash"></i>
+                      </button>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+
+              <div style="margin-top: 8px;">
+                <a href="https://tabler.io/icons" target="_blank" class="link-external">
+                  <i class="ti ti-external-link"></i> Browse icon names on Tabler Icons (tabler.io/icons)
+                </a>
+              </div>
+            </div>
+          `).join('')}
+
+          <div>
+            <button class="btn btn-secondary btn-sm btn-add-cat" data-tidx="${tIdx}">
+              <i class="ti ti-folder-plus"></i> Add Category
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    this.bindBookmarkEvents();
+  }
+
+  bindBookmarkEvents() {
+    const container = this.shadow.querySelector('#bookmarks-tree-container');
+    const tabs = this.draftConfig.tabs;
+
+    // Tab Name & Banner inputs
+    container.querySelectorAll('.tab-name-input').forEach(el => {
+      el.oninput = (e) => { tabs[e.target.dataset.tidx].name = e.target.value; };
+    });
+    container.querySelectorAll('.tab-bg-input').forEach(el => {
+      el.oninput = (e) => { tabs[e.target.dataset.tidx].background_url = e.target.value; };
+    });
+
+    // Delete Tab with custom in-app confirmation modal
+    container.querySelectorAll('.btn-del-tab').forEach(el => {
+      el.onclick = async (e) => {
+        const btn = e.target.closest('.btn-del-tab');
+        const tIdx = parseInt(btn.dataset.tidx);
+        const tabName = tabs[tIdx].name || 'this tab';
+        const confirmed = await this.showConfirmModal({
+          title: 'Delete Tab',
+          message: `Are you sure you want to delete tab "${tabName}" and all its categories and links?`,
+          confirmText: 'Delete Tab',
+          confirmType: 'danger',
+        });
+        if (confirmed) {
+          tabs.splice(tIdx, 1);
+          this.renderBookmarksTree();
+          this.showToast(`Tab "${tabName}" deleted.`, 'info');
+        }
+      };
+    });
+
+    // Category Name input
+    container.querySelectorAll('.cat-name-input').forEach(el => {
+      el.oninput = (e) => {
+        const { tidx, cidx } = e.target.dataset;
+        tabs[tidx].categories[cidx].name = e.target.value;
+      };
+    });
+
+    // Add Category
+    container.querySelectorAll('.btn-add-cat').forEach(el => {
+      el.onclick = (e) => {
+        const btn = e.target.closest('.btn-add-cat');
+        const tIdx = parseInt(btn.dataset.tidx);
+        if (!tabs[tIdx].categories) tabs[tIdx].categories = [];
+        tabs[tIdx].categories.push({ name: 'new category', links: [] });
+        this.renderBookmarksTree();
+      };
+    });
+
+    // Delete Category with custom in-app confirmation modal
+    container.querySelectorAll('.btn-del-cat').forEach(el => {
+      el.onclick = async (e) => {
+        const btn = e.target.closest('.btn-del-cat');
+        const { tidx, cidx } = btn.dataset;
+        const catName = tabs[tidx].categories[cidx].name || 'this category';
+        const confirmed = await this.showConfirmModal({
+          title: 'Delete Category',
+          message: `Are you sure you want to delete category "${catName}"?`,
+          confirmText: 'Delete Category',
+          confirmType: 'danger',
+        });
+        if (confirmed) {
+          tabs[tidx].categories.splice(parseInt(cidx), 1);
+          this.renderBookmarksTree();
+          this.showToast(`Category "${catName}" deleted.`, 'info');
+        }
+      };
+    });
+
+    // Link Inputs
+    container.querySelectorAll('.link-name-input').forEach(el => {
+      el.oninput = (e) => {
+        const { tidx, cidx, lidx } = e.target.dataset;
+        tabs[tidx].categories[cidx].links[lidx].name = e.target.value;
+      };
+    });
+
+    container.querySelectorAll('.link-url-input').forEach(el => {
+      el.oninput = (e) => {
+        const { tidx, cidx, lidx } = e.target.dataset;
+        tabs[tidx].categories[cidx].links[lidx].url = e.target.value;
+      };
+    });
+
+    // Link Icon input with live preview
+    container.querySelectorAll('.link-icon-input').forEach(el => {
+      el.oninput = (e) => {
+        const { tidx, cidx, lidx } = e.target.dataset;
+        const iconVal = e.target.value.trim();
+        tabs[tidx].categories[cidx].links[lidx].icon = iconVal;
+
+        const preview = this.shadow.querySelector(`#icon-preview-${tidx}-${cidx}-${lidx}`);
+        if (preview) {
+          preview.className = `ti ti-${escapeHtml(iconVal || 'link')} icon-preview-display`;
+        }
+      };
+    });
+
+    // Link Colour input change listener
+    container.querySelectorAll('.link-color-input').forEach(el => {
+      el.onchange = (e) => {
+        const { tidx, cidx, lidx } = e.target.dataset;
+        const colKey = e.target.value.replace('palette.', '');
+        const resolvedColour = CONFIG.palette[colKey] || e.target.value;
+        tabs[tidx].categories[cidx].links[lidx].icon_color = resolvedColour;
+
+        const preview = this.shadow.querySelector(`#icon-preview-${tidx}-${cidx}-${lidx}`);
+        if (preview) preview.style.color = resolvedColour;
+      };
+    });
+
+    // Add Link
+    container.querySelectorAll('.btn-add-link').forEach(el => {
+      el.onclick = (e) => {
+        const btn = e.target.closest('.btn-add-link');
+        const { tidx, cidx } = btn.dataset;
+        if (!tabs[tidx].categories[cidx].links) tabs[tidx].categories[cidx].links = [];
+        tabs[tidx].categories[cidx].links.push({
+          name: 'New Link',
+          url: 'https://',
+          icon: 'link',
+          icon_color: CONFIG.palette.blue,
+        });
+        this.renderBookmarksTree();
+      };
+    });
+
+    // Delete Link
+    container.querySelectorAll('.btn-del-link').forEach(el => {
+      el.onclick = (e) => {
+        const btn = e.target.closest('.btn-del-link');
+        const { tidx, cidx, lidx } = btn.dataset;
+        tabs[tidx].categories[cidx].links.splice(parseInt(lidx), 1);
+        this.renderBookmarksTree();
+      };
+    });
+
+    // Initialise custom dropdowns in bookmarks tree
+    this.setupCustomDropdowns(container);
+  }
+
+  collectCurrentDraft() {
+    const shadow = this.shadow;
+    this.draftLight = shadow.querySelector('#gen-theme-light').value;
+    this.draftDark = shadow.querySelector('#gen-theme-dark').value;
+    this.draftConfig.fastlink = shadow.querySelector('#gen-fastlink').value.trim();
+
+    if (!this.draftConfig.search) this.draftConfig.search = {};
+    this.draftConfig.search.default = shadow.querySelector('#gen-search-default').value;
+
+    // Disabled components array
+    const disabled = [];
+    if (!shadow.querySelector('#weather-enabled').checked) {
+      disabled.push('weather-forecast');
+    }
+    if (!shadow.querySelector('#clock-enabled').checked) {
+      disabled.push('current-time');
+    }
+    this.draftConfig.disabled = disabled;
+
+    // Weather
+    if (!this.draftConfig.temperature) this.draftConfig.temperature = {};
+    this.draftConfig.temperature.location = shadow.querySelector('#weather-location').value.trim() || 'London';
+    this.draftConfig.temperature.scale = shadow.querySelector('#weather-scale').value;
+    this.draftConfig.temperature.appId = shadow.querySelector('#weather-appid').value.trim();
+
+    // Clock
+    if (!this.draftConfig.clock) this.draftConfig.clock = {};
+    this.draftConfig.clock.format = shadow.querySelector('#clock-format').value;
+
+    return this.draftConfig;
+  }
+
+  saveAndReload() {
+    const configToSave = this.collectCurrentDraft();
+
+    // Persist to localStorage with GUI priority flag
+    localStorage.setItem('guiModified', 'true');
+    localStorage.setItem('preferredLightTheme', this.draftLight);
+    localStorage.setItem('preferredDarkTheme', this.draftDark);
+    localStorage.setItem('configuration', JSON.stringify(configToSave));
+
+    this.showToast('Saving settings and reloading...', 'info');
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  }
+
+  exportJson() {
+    const cfg = this.collectCurrentDraft();
+    const exportData = {
+      ...cfg,
+      preferredLightTheme: this.draftLight,
+      preferredDarkTheme: this.draftDark,
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'catppuccin-startpage.config.json';
+    link.click();
+    URL.revokeObjectURL(url);
+
+    this.showToast('JSON backup exported successfully!', 'success');
+  }
+
+  importConfig(file) {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target.result;
+      try {
+        let imported = null;
+        if (file.name.endsWith('.json')) {
+          imported = JSON.parse(text);
+        } else {
+          // Parse JS file
+          const match = text.match(/default_configuration\s*=\s*(\{[\s\S]*?\n\};)/);
+          if (match) {
+            const rawObj = match[1].replace(/;\s*$/, '');
+            imported = (new Function(`return ${rawObj}`))();
+          } else {
+            throw new Error('Unrecognised JS configuration file format.');
+          }
+
+          const lightMatch = text.match(/preferredLightTheme\s*=\s*([a-zA-Z]+);/);
+          if (lightMatch) this.draftLight = lightMatch[1];
+          const darkMatch = text.match(/preferredDarkTheme\s*=\s*([a-zA-Z]+);/);
+          if (darkMatch) this.draftDark = darkMatch[1];
+        }
+
+        if (imported) {
+          this.draftConfig = { ...this.draftConfig, ...imported };
+          this.populateGeneralForm();
+          this.populateWeatherClockForm();
+          this.renderBookmarksTree();
+          this.showToast('Configuration imported successfully!', 'success');
+        }
+      } catch (err) {
+        this.showToast('Failed to read file: ' + err.message, 'error');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  async resetToDefault() {
+    const confirmed = await this.showConfirmModal({
+      title: 'Reset Configuration',
+      message: 'Are you sure you want to clear saved browser settings and reset to the default userconfig.js?',
+      confirmText: 'Reset Defaults',
+      confirmType: 'danger',
+    });
+
+    if (confirmed) {
+      localStorage.removeItem('configuration');
+      localStorage.removeItem('guiModified');
+      localStorage.removeItem('preferredLightTheme');
+      localStorage.removeItem('preferredDarkTheme');
+      this.showToast('Restoring defaults...', 'info');
+      setTimeout(() => {
 }
