@@ -2399,4 +2399,404 @@ class Settings extends Component {
       localStorage.removeItem('preferredDarkTheme');
       this.showToast('Restoring defaults...', 'info');
       setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    }
+  }
+
+  setEvents() {
+    const shadow = this.shadow;
+
+    // Close buttons (X and footer Close) - only close via X or Esc
+    this.refs.closeBtn.onclick = () => this.deactivate();
+    this.refs.footerCloseBtn.onclick = () => this.deactivate();
+
+    // Backdrop click does NOT close modal per user requirement
+    this.refs.modal.onclick = (e) => {
+      // Do nothing on backdrop click
+    };
+    this.refs.dialog.onclick = (e) => {
+      e.stopPropagation();
+    };
+
+    // Prevent wheel/scroll events inside settings modal from propagating to document and triggering tab switches
+    this.refs.modal.onwheel = (e) => {
+      e.stopPropagation();
+    };
+    this.refs.dialog.onwheel = (e) => {
+      e.stopPropagation();
+    };
+
+    // Sidebar navigation tabs
+    const tabButtons = this.refs.tabButtons.length !== undefined ? this.refs.tabButtons : [this.refs.tabButtons];
+    const tabPanels = this.refs.tabPanels.length !== undefined ? this.refs.tabPanels : [this.refs.tabPanels];
+
+    tabButtons.forEach(btn => {
+      btn.onclick = () => {
+        this.closeAllDropdowns();
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabPanels.forEach(p => p.classList.remove('active'));
+
+        btn.classList.add('active');
+        const tabKey = btn.dataset.tab;
+        const panel = shadow.querySelector(`#tab-${tabKey}`);
+        if (panel) panel.classList.add('active');
+      };
+    });
+
+    // Save button (footer)
+    this.refs.saveBtn.onclick = () => this.saveAndReload();
+
+    // Export JSON
+    shadow.querySelector('#btn-export-json').onclick = () => this.exportJson();
+
+    // Import file
+    const fileInput = shadow.querySelector('#file-import-input');
+    shadow.querySelector('#btn-trigger-import').onclick = () => fileInput.click();
+    fileInput.onchange = (e) => {
+      if (e.target.files && e.target.files[0]) {
+        this.importConfig(e.target.files[0]);
+        fileInput.value = '';
+      }
+    };
+
+    // Reset default
+    shadow.querySelector('#btn-reset-default').onclick = () => this.resetToDefault();
+
+    // Add Tab button
+    shadow.querySelector('#btn-add-tab').onclick = () => {
+      if (!this.draftConfig.tabs) this.draftConfig.tabs = [];
+      const newIndex = this.draftConfig.tabs.length + 1;
+      const bannerNum = String((newIndex % 18) || 1).padStart(2, '0');
+      this.draftConfig.tabs.push({
+        name: `tab_${newIndex}`,
+        background_url: `src/img/banners/banner_${bannerNum}.gif`,
+        categories: [
+          {
+            name: 'category',
+            links: [
+              { name: 'Example', url: 'https://catppuccin.com', icon: 'palette', icon_color: CONFIG.palette.blue },
+            ],
+          },
+        ],
+      });
+      this.renderBookmarksTree();
+      this.showToast('New tab added!', 'success');
+    };
+
+    // Add Additional Clock button
+    shadow.querySelector('#btn-add-additional-clock').onclick = () => {
+      if (!this.draftConfig.additionalClocks) this.draftConfig.additionalClocks = [];
+      this.draftConfig.additionalClocks.push({
+        label: 'UA',
+        timezone: 'Europe/Kyiv',
+        format: 'h:i',
+      });
+      this.renderAdditionalClocks();
+    };
+
+    // Weather & Clock widget visibility toggle switches
+    const weatherSwitch = shadow.querySelector('#weather-enabled');
+    const weatherControls = shadow.querySelector('#weather-controls');
+    if (weatherSwitch && weatherControls) {
+      weatherSwitch.onchange = () => {
+        weatherControls.style.display = weatherSwitch.checked ? 'block' : 'none';
+      };
+    }
+
+    const clockSwitch = shadow.querySelector('#clock-enabled');
+    const clockControls = shadow.querySelector('#clock-controls');
+    if (clockSwitch && clockControls) {
+      clockSwitch.onchange = () => {
+        clockControls.style.display = clockSwitch.checked ? 'block' : 'none';
+      };
+    }
+
+    // Close any open custom dropdown when clicking outside
+    this.refs.modal.addEventListener('click', (e) => {
+      if (!e.target.closest('.custom-dropdown')) {
+        this.closeAllDropdowns();
+      }
+    });
+
+    // Also close custom dropdowns if combobox input is focused
+    const cityInput = shadow.querySelector('#weather-location');
+    if (cityInput) {
+      cityInput.addEventListener('focus', () => this.closeAllDropdowns());
+    }
+
+    // Initialise pure custom dropdowns
+    this.setupCustomDropdowns();
+
+    // Initialise searchable City combobox
+    this.setupCityCombobox();
+  }
+
+  closeAllDropdowns(exceptWrap = null) {
+    const shadow = this.shadow;
+    shadow.querySelectorAll('.custom-dropdown.open').forEach(w => {
+      if (w !== exceptWrap) {
+        w.classList.remove('open');
+        w.classList.remove('dropup');
+        const trig = w.querySelector('.dropdown-trigger');
+        if (trig) trig.setAttribute('aria-expanded', 'false');
+        w.querySelectorAll('.dropdown-item').forEach(it => it.classList.remove('highlighted'));
+        const row = w.closest('.link-item-row');
+        if (row) row.classList.remove('has-open-dropdown');
+      }
+    });
+  }
+
+  initCustomDropdown(wrap) {
+    if (!wrap || wrap.dataset.dropdownReady === 'true') return;
+    wrap.dataset.dropdownReady = 'true';
+
+    const shadow = this.shadow;
+    const id = wrap.dataset.id;
+    const trigger = wrap.querySelector('.dropdown-trigger');
+    const menu = wrap.querySelector('.dropdown-menu');
+    const items = Array.from(wrap.querySelectorAll('.dropdown-item'));
+    let highlightedIndex = -1;
+
+    const updateHighlight = () => {
+      items.forEach((it, idx) => {
+        if (idx === highlightedIndex) {
+          it.classList.add('highlighted');
+          it.scrollIntoView({ block: 'nearest' });
+        } else {
+          it.classList.remove('highlighted');
+        }
+      });
+    };
+
+    const openMenu = () => {
+      // Close city combobox dropdown if open
+      const cityDropdown = shadow.querySelector('#city-combobox-dropdown');
+      if (cityDropdown) cityDropdown.classList.remove('open');
+      const cityToggle = shadow.querySelector('#combobox-toggle-btn');
+      if (cityToggle) cityToggle.classList.remove('open');
+
+      this.closeAllDropdowns(wrap);
+
+      // Check available space below to decide if dropup is needed
+      if (menu && this.refs.contentArea) {
+        const wrapRect = wrap.getBoundingClientRect();
+        const contentRect = this.refs.contentArea.getBoundingClientRect();
+        const spaceBelow = contentRect.bottom - wrapRect.bottom;
+        const spaceAbove = wrapRect.top - contentRect.top;
+        if (spaceBelow < 220 && spaceAbove > spaceBelow) {
+          wrap.classList.add('dropup');
+        } else {
+          wrap.classList.remove('dropup');
+        }
+      }
+
+      wrap.classList.add('open');
+      if (trigger) trigger.setAttribute('aria-expanded', 'true');
+      const row = wrap.closest('.link-item-row');
+      if (row) row.classList.add('has-open-dropdown');
+
+      const selIdx = items.findIndex(it => it.classList.contains('selected'));
+      highlightedIndex = selIdx >= 0 ? selIdx : 0;
+      updateHighlight();
+    };
+
+    const closeMenu = () => {
+      wrap.classList.remove('open');
+      wrap.classList.remove('dropup');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      items.forEach(it => it.classList.remove('highlighted'));
+      highlightedIndex = -1;
+      const row = wrap.closest('.link-item-row');
+      if (row) row.classList.remove('has-open-dropdown');
+    };
+
+    const selectItem = (val) => {
+      this.setDropdownValue(id, val);
+      const input = wrap.querySelector(`#${id}`);
+      if (input) {
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      closeMenu();
+      if (trigger) trigger.focus();
+    };
+
+    if (trigger) {
+      trigger.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (wrap.classList.contains('open')) {
+          closeMenu();
+        } else {
+          openMenu();
+        }
+      };
+
+      trigger.onkeydown = (e) => {
+        const isOpen = wrap.classList.contains('open');
+
+        if (!isOpen) {
+          if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openMenu();
+            return;
+          }
+        }
+
+        if (isOpen) {
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (items.length > 0) {
+              highlightedIndex = (highlightedIndex + 1) % items.length;
+              updateHighlight();
+            }
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (items.length > 0) {
+              highlightedIndex = (highlightedIndex - 1 + items.length) % items.length;
+              updateHighlight();
+            }
+          } else if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            if (highlightedIndex >= 0 && highlightedIndex < items.length) {
+              selectItem(items[highlightedIndex].dataset.value);
+            } else {
+              closeMenu();
+            }
+          } else if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            closeMenu();
+          } else if (e.key === 'Tab') {
+            closeMenu();
+          }
+        }
+      };
+    }
+
+    items.forEach((item, idx) => {
+      item.onmouseenter = () => {
+        highlightedIndex = idx;
+        items.forEach((it, i) => it.classList.toggle('highlighted', i === idx));
+      };
+
+      item.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        selectItem(item.dataset.value);
+      };
+    });
+  }
+
+  setupCustomDropdowns(root = this.shadow) {
+    if (!root) return;
+    const dropdownWrappers = root.querySelectorAll('.custom-dropdown');
+    dropdownWrappers.forEach(wrap => this.initCustomDropdown(wrap));
+  }
+
+  setupCityCombobox() {
+    const shadow = this.shadow;
+    const wrapper = shadow.querySelector('#city-combobox-wrapper');
+    const input = shadow.querySelector('#weather-location');
+    const toggleBtn = shadow.querySelector('#combobox-toggle-btn');
+    const clearBtn = shadow.querySelector('#combobox-clear-btn');
+    const dropdown = shadow.querySelector('#city-combobox-dropdown');
+
+    if (!wrapper || !input || !dropdown) return;
+
+    let highlightedIndex = -1;
+    let filteredResults = []; // array of { city, matchedAlias }
+
+    const updateClearBtnVisibility = () => {
+      if (clearBtn) {
+        if (input.value.trim().length > 0) {
+          clearBtn.classList.add('visible');
+        } else {
+          clearBtn.classList.remove('visible');
+        }
+      }
+    };
+
+    const highlightMatch = (text, query) => {
+      if (!query) return escapeHtml(text);
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escapedQuery})`, 'gi');
+      return escapeHtml(text).replace(regex, '<span class="combobox-highlight">$1</span>');
+    };
+
+    const closeDropdown = () => {
+      dropdown.classList.remove('open');
+      if (toggleBtn) toggleBtn.classList.remove('open');
+      highlightedIndex = -1;
+    };
+
+    const openDropdown = () => {
+      // Close open custom dropdowns when combobox opens
+      this.closeAllDropdowns();
+      dropdown.classList.add('open');
+      if (toggleBtn) toggleBtn.classList.add('open');
+    };
+
+    const renderDropdown = (results, query = '') => {
+      filteredResults = results;
+      highlightedIndex = -1;
+
+      if (results.length === 0) {
+        dropdown.innerHTML = `
+          <div class="combobox-empty">
+            <i class="ti ti-map-pin-off combobox-empty-icon"></i>
+            <div>No predefined city matched.</div>
+            <div style="font-size: 11px; margin-top: 4px; color: ${CONFIG.palette.subtext0};">
+              Press Enter to use "<strong>${escapeHtml(input.value)}</strong>" as custom location.
+            </div>
+          </div>
+        `;
+        openDropdown();
+        return;
+      }
+
+      const q = query.trim().toLowerCase();
+      const currentVal = input.value.trim().toLowerCase();
+
+      const headerHtml = `
+        <div class="combobox-header">
+          <span>${q ? 'Matching Cities' : 'Suggested Cities'} (${results.length})</span>
+          <span class="combobox-nav-hint">↑↓ navigate • ↵ select</span>
+        </div>
+      `;
+
+      const itemsHtml = results.map((item, idx) => {
+        const { city, matchedAlias } = item;
+        const isCurrent = city.name.toLowerCase() === currentVal;
+        const highlightedName = highlightMatch(city.name, q);
+
+        return `
+          <div class="combobox-item ${isCurrent ? 'selected' : ''}" data-index="${idx}" data-name="${escapeHtml(city.name)}">
+            <div class="combobox-item-name">
+              <i class="ti ti-map-pin"></i>
+              <span>${highlightedName}</span>
+            </div>
+            <div class="combobox-tags">
+              ${matchedAlias && matchedAlias !== city.name.toLowerCase() ? `<span class="combobox-alias-badge">via alias "${escapeHtml(matchedAlias)}"</span>` : ''}
+              <span class="combobox-item-country">${escapeHtml(city.country)}</span>
+              ${isCurrent ? '<i class="ti ti-check combobox-item-check"></i>' : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      dropdown.innerHTML = headerHtml + itemsHtml;
+
+      dropdown.querySelectorAll('.combobox-item').forEach(itemEl => {
+        itemEl.onmousedown = (e) => {
+          e.preventDefault();
+          selectCity(itemEl.dataset.name);
+        };
+      });
+
+      openDropdown();
+    };
+
+    const filterCities = (query) => {
 }
