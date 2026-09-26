@@ -51,3 +51,12 @@ tabs-list {
   background-size: cover;
   background-color: var(--bg);
 }
+
+settings-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  z-index: 10000;
+}
