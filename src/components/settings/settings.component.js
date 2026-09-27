@@ -1,4 +1,4 @@
-﻿// Global cities database for the searchable combobox with aliases and country names
+// Global cities database for the searchable combobox with aliases and country names
 const CITIES_DATABASE = [
   // Europe
   { name: 'Moscow', country: 'Russia', aliases: ['moskow', 'moskva', 'moscow', 'russia'] },
@@ -2799,4 +2799,134 @@ class Settings extends Component {
     };
 
     const filterCities = (query) => {
+      const q = (query || '').trim().toLowerCase();
+      updateClearBtnVisibility();
+
+      if (!q) {
+        const defaultList = CITIES_DATABASE.slice(0, 35).map(c => ({ city: c, matchedAlias: null }));
+        renderDropdown(defaultList, '');
+        return;
+      }
+
+      const matches = [];
+      for (const city of CITIES_DATABASE) {
+        const nameLower = city.name.toLowerCase();
+        const countryLower = city.country.toLowerCase();
+
+        if (nameLower.includes(q)) {
+          matches.push({ city, matchedAlias: null });
+        } else if (countryLower.includes(q)) {
+          matches.push({ city, matchedAlias: city.country });
+        } else if (city.aliases) {
+          const foundAlias = city.aliases.find(a => a.toLowerCase().includes(q));
+          if (foundAlias) {
+            matches.push({ city, matchedAlias: foundAlias });
+          }
+        }
+      }
+
+      renderDropdown(matches, q);
+    };
+
+    const selectCity = (cityName) => {
+      input.value = cityName;
+      updateClearBtnVisibility();
+      closeDropdown();
+      highlightedIndex = -1;
+    };
+
+    const updateHighlight = () => {
+      const items = dropdown.querySelectorAll('.combobox-item');
+      items.forEach((item, idx) => {
+        if (idx === highlightedIndex) {
+          item.classList.add('active');
+          item.scrollIntoView({ block: 'nearest' });
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    };
+
+    input.onfocus = () => {
+      filterCities(input.value);
+    };
+
+    input.oninput = () => {
+      filterCities(input.value);
+    };
+
+    input.onkeydown = (e) => {
+      if (!dropdown.classList.contains('open')) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          filterCities(input.value);
+          e.preventDefault();
+          return;
+        }
+        return;
+      }
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (filteredResults.length > 0) {
+          highlightedIndex = (highlightedIndex + 1) % filteredResults.length;
+          updateHighlight();
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (filteredResults.length > 0) {
+          highlightedIndex = (highlightedIndex - 1 + filteredResults.length) % filteredResults.length;
+          updateHighlight();
+        }
+      } else if (e.key === 'Enter') {
+        if (highlightedIndex >= 0 && highlightedIndex < filteredResults.length) {
+          e.preventDefault();
+          selectCity(filteredResults[highlightedIndex].city.name);
+        } else {
+          closeDropdown();
+        }
+      } else if (e.key === 'Escape') {
+        closeDropdown();
+        e.stopPropagation();
+      }
+    };
+
+    input.onblur = () => {
+      setTimeout(() => {
+        closeDropdown();
+      }, 150);
+    };
+
+    if (toggleBtn) {
+      toggleBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (dropdown.classList.contains('open')) {
+          closeDropdown();
+        } else {
+          input.focus();
+          filterCities(input.value);
+        }
+      };
+    }
+
+    if (clearBtn) {
+      clearBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        input.value = '';
+        input.focus();
+        filterCities('');
+      };
+    }
+
+    // Initial check for clear button
+    updateClearBtnVisibility();
+  }
+
+  connectedCallback() {
+    this.render().then(() => {
+      this.setEvents();
+    });
+  }
 }
+
