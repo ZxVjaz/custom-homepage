@@ -57,6 +57,8 @@ class Search extends Component {
           font: 500 22px 'Roboto', sans-serif;
           letter-spacing: 1px;
           color: ${CONFIG.palette.lavender};
+          -webkit-user-select: text;
+          user-select: text;
       }
 
       #search input:focus {

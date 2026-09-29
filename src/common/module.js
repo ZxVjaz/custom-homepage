@@ -7,6 +7,7 @@ const components = {
   "current-time": Clock,
   "weather-forecast": Weather,
   "tabs-list": Tabs,
+  "settings-modal": Settings,
 };
 
 Object.keys(components).forEach((componentName) => {

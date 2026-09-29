@@ -424,10 +424,20 @@ class Settings extends Component {
         outline: none;
         transition: border-color 0.15s ease, box-shadow 0.15s ease;
         width: 100%;
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
       }
       .form-input:focus {
         border-color: ${p.blue};
         box-shadow: 0 0 0 3px ${p.blue}25;
+      }
+      .form-input::selection,
+      input::selection,
+      textarea::selection {
+        background: ${p.surface2};
+        color: ${p.text};
       }
 
       .form-select {
