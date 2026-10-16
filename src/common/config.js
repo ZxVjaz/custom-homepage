@@ -1,5 +1,5 @@
 class Config {
-  // Default configuration values for the startpage - these can be overridden by user configuration or local storage
+  // Default configuration values for the homepage - these can be overridden by user configuration or local storage
   defaults = {
     overrideStorage: false,
     temperature: {
@@ -15,18 +15,9 @@ class Config {
     },
     additionalClocks: [
       {
-        label: "UA",
-        // IANA timezone name (handles DST automatically)
-        timezone: "Europe/Kyiv",
-        // 24-hour format
-        format: "h:i",
-      },
-      {
         label: "Tokyo",
         timezone: "Asia/Tokyo",
-        // 24-hour format without leading zero
-        format: "H:i",
-        locale: "ja-JP",
+        format: "h:i",
       }
     ],
     search: {
@@ -41,7 +32,7 @@ class Config {
     // URL to open when clicking the fastlink button in the statusbar
     fastlink: "",
     // Whether to use local fonts instead of Google Fonts CDN
-    localFonts: false,
+    localFonts: true,
     openLastVisitedTab: false,
     // User-defined bookmark tabs
     tabs: [],
@@ -55,7 +46,7 @@ class Config {
   /**
    * Initialise the configuration with user settings and palette
    * @param {Object} configuration - User configuration object
-   * @param {Object} palette - Colour palette for the startpage
+   * @param {Object} palette - Colour palette for the homepage
    */
   constructor(configuration, palette) {
     this.config = configuration;
@@ -129,7 +120,7 @@ class Config {
   }
 
   /**
-   * Set up keybinding actions for the startpage
+   * Set up keybinding actions for the homepage
    * @returns {void}
    */
   setKeybindings() {

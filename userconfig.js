@@ -1,4 +1,4 @@
-// User configuration for the startpage - update the palette, location, and your preferred tabs, categories, and links
+// User configuration for the homepage - update the palette, location, and your preferred tabs, categories, and links
 
 // Available themes: latte, frappe, mocha, macchiato
 const preferredLightTheme = latte;
@@ -21,8 +21,8 @@ const default_configuration = {
   },
   additionalClocks: [
     {
-      label: "UA",
-      timezone: "Europe/Kyiv",
+      label: "Tokyo",
+      timezone: "Asia/Tokyo",
       format: "h:i",
       icon_color: palette.peach,
     },
@@ -39,7 +39,7 @@ const default_configuration = {
   },
   disabled: [],
   localIcons: false,
-  localFonts: false,
+  localFonts: true,
   fastlink: "https://www.google.com",
   openLastVisitedTab: false,
   tabs: [
