@@ -51,8 +51,6 @@ A Customisable homepage that uses the [**Catppuccin palettes**](https://catppucc
 > **Quick Configuration via GUI**:
 > You can configure everything directly in your browser without editing code! Open the search bar by pressing <kbd>s</kbd>, type `:settings`, and hit <kbd>Enter</kbd> to launch the visual settings modal. See [Settings & Customisation](#️-settings--customisation) below for details.
 > You can find icons for your bookmarks using [`tabler-icons`](https://tabler.io/icons).
->
-> To cut icon loading times, install the icon [font](src/fonts) locally and set `"localIcons": true` in the configuration to disable remote styles. Set `"localFonts": true` to serve all fonts from the repository instead of the Google Fonts CDN.
 
 1. Open https://zxvjaz.github.io/custom-homepage/
 2. Configure as you like and enjoy!
@@ -72,8 +70,7 @@ You can use different add-ons or extensions for this.
 
 ## 🛠️ Development
 
-For local viewing, run `python3 -m http.server 8000` from the repository root and open `http://localhost:8000`.
-To regenerate the palette CSS, run `just build` (requires [`whiskers`](https://github.com/catppuccin/whiskers)).
+For local viewing, run `python3 -m http.server 8000` from the repository root and open `http://localhost:8000`. note: you need python to do this.
 
 ### 🔎 Search
 

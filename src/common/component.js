@@ -1,6 +1,6 @@
 const RenderedComponents = {};
 
-// Base class for all startpage components: shadow DOM, resource management, rendering
+// Base class for all homepage components: shadow DOM, resource management, rendering
 class Component extends HTMLElement {
   refs = {};
 

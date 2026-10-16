@@ -12,7 +12,7 @@ new Date().strftime("do B Y")    => 18th January 2018
 new Date().strftime("h:i p")     => 09:32 PM (12-hour format)
 new Date().strftime("K:i p")     => 9:32 PM (12-hour format without leading zero)
 
-This function extends Date.prototype with the date formatting used by the startpage
+This function extends Date.prototype with the date formatting used by the homepage
 */
 
 // Create a date object for a specific timezone using IANA timezone names

@@ -1,5 +1,5 @@
 
-// Catppuccin palette definitions for startpage theming
+// Catppuccin palette definitions for homepage theming
 // Each palette is a set of named colour values
 const latte = {
   rosewater: "#dc8a78",

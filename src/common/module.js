@@ -1,4 +1,4 @@
-// Registers all startpage components as custom elements
+// Registers all homepage components as custom elements
 // Components listed as disabled in the configuration are skipped
 
 const components = {
