@@ -225,8 +225,8 @@ class Search extends Component {
     let args = target.value.split(' ');
     let prefix = args[0];
 
-    const defaultEngineKey = CONFIG.search.default || 'd';
-    let engine = this.engines[defaultEngineKey]?.[0] || this.engines['d'][0];
+    const defaultEngineKey = CONFIG.search?.default || 'd';
+    let engine = this.engines[defaultEngineKey]?.[0] || (this.engines['d'] && this.engines['d'][0]) || (Object.values(this.engines)[0] && Object.values(this.engines)[0][0]);
 
     if (key === 'Escape') {
       this.deactivate();
@@ -258,8 +258,11 @@ class Search extends Component {
 
       // Check for engine prefix (e.g., !g for Google)
       if (prefix.indexOf('!') === 0) {
-        engine = this.engines[prefix.substr(1)][0];
-        args = args.slice(1);
+        const customEngine = this.engines[prefix.substr(1)];
+        if (customEngine) {
+          engine = customEngine[0];
+          args = args.slice(1);
+        }
       }
 
       window.location = engine + encodeURI(args.join(' '));
