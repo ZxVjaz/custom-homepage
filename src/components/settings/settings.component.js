@@ -2045,6 +2045,21 @@ class Settings extends Component {
                   </div>
                 </div>
 
+                <div class="card">
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <span class="form-label" style="font-size: 14px; margin: 0;">App Version</span>
+                        <span id="pwa-version-badge" style="font-size: 11px; padding: 2px 7px; border-radius: 4px; background: ${p.surface2}; color: ${p.blue}; font-weight: 600;">...</span>
+                      </div>
+                      <div class="form-hint" id="pwa-status-hint">Currently installed version. Check anytime for new updates.</div>
+                    </div>
+                    <button class="btn btn-secondary" id="btn-check-pwa-update" style="flex-shrink: 0; white-space: nowrap;">
+                      <i class="ti ti-refresh" id="btn-check-pwa-icon"></i> <span id="btn-check-pwa-text">Check for Updates</span>
+                    </button>
+                  </div>
+                </div>
+
                 <div class="card" style="border-color: ${p.red}40;">
                   <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
                     <div style="flex: 1; min-width: 0;">
@@ -2346,7 +2361,282 @@ class Settings extends Component {
     this.setDropdownValue('gen-theme-light', this.draftLight);
     this.setDropdownValue('gen-theme-dark', this.draftDark);
     shadow.querySelector('#gen-fastlink').value = this.draftConfig.fastlink || '';
-    this.setDropdownValue('gen-search-default', this.draftConfig.search?.default || 'd');
+
+    // Ensure search config and engines structure
+    if (!this.draftConfig.search) this.draftConfig.search = {};
+    if (!this.draftConfig.search.engines || typeof this.draftConfig.search.engines !== 'object') {
+      this.draftConfig.search.engines = {
+        d: ['https://duckduckgo.com/?q=', 'DuckDuckGo'],
+        g: ['https://google.com/search?q=', 'Google'],
+      };
+    }
+    const engineKeys = Object.keys(this.draftConfig.search.engines);
+    if (!this.draftConfig.search.default || !this.draftConfig.search.engines[this.draftConfig.search.default]) {
+      this.draftConfig.search.default = engineKeys[0] || 'd';
+    }
+
+    this.updateSearchDefaultDropdown();
+
+    // Dynamically retrieve version from sw.js via PWA manager
+    if (window.PWA && typeof window.PWA.getVersion === 'function') {
+      window.PWA.getVersion().then((ver) => {
+        const badge = shadow.querySelector('#pwa-version-badge');
+        if (badge && ver) {
+          badge.textContent = ver;
+        }
+      });
+    }
+  }
+
+  updateSearchDefaultDropdown() {
+    const shadow = this.shadow;
+    const engines = this.draftConfig.search?.engines || {};
+    const currentDefault = this.draftConfig.search?.default || Object.keys(engines)[0] || 'd';
+    const wrap = shadow.querySelector('.custom-dropdown[data-id="gen-search-default"]');
+    if (!wrap) return;
+
+    const menu = wrap.querySelector('.dropdown-menu');
+    if (menu) {
+      menu.innerHTML = Object.entries(engines).map(([key, data]) => {
+        const url = Array.isArray(data) ? data[0] : '';
+        const name = Array.isArray(data) ? data[1] : key;
+        const isSel = key === currentDefault;
+        const icon = getEngineIcon(data, key);
+        return `
+          <div class="dropdown-item ${isSel ? 'selected' : ''}" data-value="${escapeHtml(key)}">
+            <div class="dropdown-item-left">
+              <i class="ti ti-${escapeHtml(icon)} dropdown-icon"></i>
+              <span>${escapeHtml(name)}</span>
+            </div>
+            <div class="dropdown-item-right">
+              <span class="dropdown-badge">!${escapeHtml(key)}</span>
+              <i class="ti ti-check dropdown-check"></i>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    delete wrap.dataset.dropdownReady;
+    this.initCustomDropdown(wrap);
+    this.setDropdownValue('gen-search-default', currentDefault);
+  }
+
+  openConfigureEnginesModal() {
+    this.renderConfigureEnginesList();
+    const modal = this.shadow.querySelector('#configure-engines-modal');
+    if (modal) {
+      modal.classList.remove('closing');
+      modal.classList.add('active');
+    }
+  }
+
+  closeConfigureEnginesModal() {
+    const modal = this.shadow.querySelector('#configure-engines-modal');
+    if (!modal || modal.classList.contains('closing')) return;
+    modal.classList.add('closing');
+    setTimeout(() => {
+      modal.classList.remove('active', 'closing');
+      this.updateSearchDefaultDropdown();
+    }, 180);
+  }
+
+  openEngineEditorModal(mode, editKey = null) {
+    const shadow = this.shadow;
+    const modal = shadow.querySelector('#engine-editor-modal');
+    const title = shadow.querySelector('#engine-editor-title');
+    const oldKeyInput = shadow.querySelector('#engine-edit-old-key');
+    const keyInput = shadow.querySelector('#engine-key-input');
+    const nameInput = shadow.querySelector('#engine-name-input');
+    const urlInput = shadow.querySelector('#engine-url-input');
+    const iconInput = shadow.querySelector('#engine-icon-input');
+    const iconPreview = shadow.querySelector('#engine-icon-preview');
+
+    if (!modal) return;
+
+    if (mode === 'edit' && editKey) {
+      const data = this.draftConfig.search.engines[editKey];
+      const engineName = Array.isArray(data) ? data[1] : editKey;
+      const engineUrl = Array.isArray(data) ? data[0] : '';
+      const currentIcon = (Array.isArray(data) && data[2]) ? data[2] : getEngineIcon(data, editKey);
+
+      title.textContent = `Edit Engine (${engineName})`;
+      oldKeyInput.value = editKey;
+      keyInput.value = editKey;
+      nameInput.value = engineName;
+      urlInput.value = engineUrl;
+      iconInput.value = currentIcon;
+      if (iconPreview) {
+        iconPreview.className = `ti ti-${escapeHtml(currentIcon)} icon-preview-display`;
+      }
+    } else {
+      title.textContent = 'Add Search Engine';
+      oldKeyInput.value = '';
+      keyInput.value = '';
+      nameInput.value = '';
+      urlInput.value = '';
+      iconInput.value = '';
+      if (iconPreview) {
+        iconPreview.className = 'ti ti-adjustments-horizontal icon-preview-display';
+      }
+    }
+
+    modal.classList.remove('closing');
+    modal.classList.add('active');
+    setTimeout(() => {
+      if (mode === 'edit') {
+        nameInput.focus();
+      } else {
+        keyInput.focus();
+      }
+    }, 50);
+  }
+
+  closeEngineEditorModal() {
+    const modal = this.shadow.querySelector('#engine-editor-modal');
+    if (!modal || modal.classList.contains('closing')) return;
+    modal.classList.add('closing');
+    setTimeout(() => {
+      modal.classList.remove('active', 'closing');
+    }, 180);
+  }
+
+  saveEngineFromEditor() {
+    const shadow = this.shadow;
+    const oldKey = shadow.querySelector('#engine-edit-old-key').value.trim();
+    let key = shadow.querySelector('#engine-key-input').value.trim().replace(/^!+/, '').toLowerCase();
+    const name = shadow.querySelector('#engine-name-input').value.trim();
+    let url = shadow.querySelector('#engine-url-input').value.trim();
+    const iconRaw = shadow.querySelector('#engine-icon-input').value.trim().replace(/^(ti\s+ti-|ti-)/, '').trim();
+    const icon = iconRaw || 'adjustments-horizontal';
+
+    if (!key) {
+      this.showToast('Please enter a keyword prefix (e.g., "g").', 'error');
+      shadow.querySelector('#engine-key-input').focus();
+      return;
+    }
+    if (/\s/.test(key)) {
+      this.showToast('Prefix keyword cannot contain spaces.', 'error');
+      shadow.querySelector('#engine-key-input').focus();
+      return;
+    }
+    if (!name) {
+      this.showToast('Please enter an engine name.', 'error');
+      shadow.querySelector('#engine-name-input').focus();
+      return;
+    }
+    if (!url) {
+      this.showToast('Please enter a search query URL.', 'error');
+      shadow.querySelector('#engine-url-input').focus();
+      return;
+    }
+
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+
+    if (key !== oldKey && this.draftConfig.search.engines[key]) {
+      this.showToast(`Prefix "!${key}" is already used by another search engine.`, 'error');
+      shadow.querySelector('#engine-key-input').focus();
+      return;
+    }
+
+    if (oldKey && oldKey !== key) {
+      delete this.draftConfig.search.engines[oldKey];
+      if (this.draftConfig.search.default === oldKey) {
+        this.draftConfig.search.default = key;
+      }
+    }
+
+    this.draftConfig.search.engines[key] = [url, name, icon];
+
+    if (!this.draftConfig.search.default) {
+      this.draftConfig.search.default = key;
+    }
+
+    this.closeEngineEditorModal();
+    this.renderConfigureEnginesList();
+    this.updateSearchDefaultDropdown();
+    this.showToast(oldKey ? `Search engine "${name}" updated!` : `Search engine "${name}" added!`, 'success');
+  }
+
+  renderConfigureEnginesList() {
+    const shadow = this.shadow;
+    const container = shadow.querySelector('#modal-engines-list');
+    if (!container) return;
+
+    const engines = this.draftConfig.search?.engines || {};
+    const entries = Object.entries(engines);
+
+    if (entries.length === 0) {
+      container.innerHTML = `<div style="font-size: 13px; color: ${CONFIG.palette.overlay0}; padding: 16px 0; text-align: center;">No search engines configured. Click "+ Add Engine" to add one.</div>`;
+      return;
+    }
+
+    container.innerHTML = entries.map(([key, data]) => {
+      const url = Array.isArray(data) ? data[0] : '';
+      const name = Array.isArray(data) ? data[1] : key;
+      const icon = getEngineIcon(data, key);
+
+      return `
+        <div class="search-engine-item">
+          <div class="engine-info">
+            <div class="engine-badge-group">
+              <i class="ti ti-${escapeHtml(icon)}" style="font-size: 16px; color: ${CONFIG.palette.blue};"></i>
+              <span class="engine-key-badge">!${escapeHtml(key)}</span>
+              <span class="engine-name">${escapeHtml(name)}</span>
+            </div>
+            <div class="engine-url" title="${escapeHtml(url)}">${escapeHtml(url)}</div>
+          </div>
+          <div class="engine-actions">
+            <button type="button" class="btn btn-secondary btn-sm btn-edit-engine" data-key="${escapeHtml(key)}" title="Edit engine">
+              <i class="ti ti-pencil"></i> Edit
+            </button>
+            <button type="button" class="btn btn-danger btn-sm btn-icon-only btn-del-engine" data-key="${escapeHtml(key)}" title="Delete engine">
+              <i class="ti ti-trash"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Attach event listeners inside configure modal
+    container.querySelectorAll('.btn-edit-engine').forEach(btn => {
+      btn.onclick = () => {
+        const key = btn.dataset.key;
+        this.openEngineEditorModal('edit', key);
+      };
+    });
+
+    container.querySelectorAll('.btn-del-engine').forEach(btn => {
+      btn.onclick = async () => {
+        const key = btn.dataset.key;
+        if (Object.keys(this.draftConfig.search.engines).length <= 1) {
+          this.showToast('You must keep at least one search engine.', 'error');
+          return;
+        }
+
+        const engineData = this.draftConfig.search.engines[key];
+        const engineName = Array.isArray(engineData) ? engineData[1] : key;
+
+        const confirmed = await this.showConfirmModal({
+          title: 'Delete Search Engine',
+          message: `Are you sure you want to delete "${engineName}" (!${key})?`,
+          confirmText: 'Delete Engine',
+          confirmType: 'danger',
+        });
+
+        if (confirmed) {
+          delete this.draftConfig.search.engines[key];
+          if (this.draftConfig.search.default === key) {
+            this.draftConfig.search.default = Object.keys(this.draftConfig.search.engines)[0];
+          }
+          this.renderConfigureEnginesList();
+          this.updateSearchDefaultDropdown();
+          this.showToast(`Search engine "${engineName}" deleted.`, 'info');
+        }
+      };
+    });
   }
 
   populateWeatherClockForm() {
@@ -2770,7 +3060,7 @@ class Settings extends Component {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'catppuccin-startpage.config.json';
+    link.download = 'catppuccin-homepage.config.json';
     link.click();
     URL.revokeObjectURL(url);
 
@@ -2947,6 +3237,47 @@ class Settings extends Component {
     // Reset default
     shadow.querySelector('#btn-reset-default').onclick = () => this.resetToDefault();
 
+    // Check for PWA updates
+    const btnCheckUpdate = shadow.querySelector('#btn-check-pwa-update');
+    const updateIcon = shadow.querySelector('#btn-check-pwa-icon');
+    const updateText = shadow.querySelector('#btn-check-pwa-text');
+
+    if (btnCheckUpdate) {
+      btnCheckUpdate.onclick = async () => {
+        if (!window.PWA) {
+          this.showToast('PWA is not supported in this environment.', 'info');
+          return;
+        }
+
+        btnCheckUpdate.disabled = true;
+        if (updateText) updateText.textContent = 'Checking...';
+        if (updateIcon) updateIcon.className = 'ti ti-refresh ti-spin';
+
+        try {
+          const result = await window.PWA.checkUpdate();
+          const currentVer = await window.PWA.getVersion();
+          const badge = shadow.querySelector('#pwa-version-badge');
+          if (badge && currentVer) badge.textContent = currentVer;
+
+          if (result.status === 'update_found') {
+            this.showToast('A new update is available! Check the notification.', 'info');
+          } else if (result.status === 'up_to_date') {
+            this.showToast(`Homepage is already using the latest version (${currentVer})!`, 'success');
+          } else if (result.status === 'offline') {
+            this.showToast('You are currently offline.', 'info');
+          } else {
+            this.showToast(result.message || 'Check completed.', 'info');
+          }
+        } catch (e) {
+          this.showToast('Error checking for updates.', 'error');
+        } finally {
+          btnCheckUpdate.disabled = false;
+          if (updateText) updateText.textContent = 'Check for Updates';
+          if (updateIcon) updateIcon.className = 'ti ti-refresh';
+        }
+      };
+    }
+
     // Add Tab button
     shadow.querySelector('#btn-add-tab').onclick = () => {
       if (!this.draftConfig.tabs) this.draftConfig.tabs = [];
@@ -2972,8 +3303,8 @@ class Settings extends Component {
     shadow.querySelector('#btn-add-additional-clock').onclick = () => {
       if (!this.draftConfig.additionalClocks) this.draftConfig.additionalClocks = [];
       this.draftConfig.additionalClocks.push({
-        label: 'UA',
-        timezone: 'Europe/Kyiv',
+        label: 'Tokyo',
+        timezone: 'Asia/Tokyo',
         format: 'h:i',
       });
       this.renderAdditionalClocks();
