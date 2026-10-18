@@ -120,6 +120,24 @@ function capitalizeFirst(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+function getEngineIcon(data, key = '') {
+  if (Array.isArray(data) && data[2]) {
+    const raw = String(data[2]).trim().replace(/^(ti\s+ti-|ti-)/, '').trim();
+    if (raw) return raw;
+  }
+  const name = Array.isArray(data) ? data[1] : (typeof data === 'string' ? data : '');
+  const str = (String(name) + ' ' + String(key)).toLowerCase();
+  if (str.includes('google')) return 'brand-google';
+  if (str.includes('duck')) return 'shield-check';
+  if (str.includes('perp')) return 'sparkles';
+  if (str.includes('bing')) return 'brand-bing';
+  if (str.includes('yahoo')) return 'brand-yahoo';
+  if (str.includes('youtube')) return 'brand-youtube';
+  if (str.includes('git')) return 'brand-github';
+  if (str.includes('wiki')) return 'book';
+  return 'adjustments-horizontal';
+}
+
 function resolveColourKey(iconColor) {
   if (!iconColor) return 'blue';
   if (typeof iconColor === 'string' && iconColor.startsWith('palette.')) {
@@ -945,7 +963,168 @@ class Settings extends Component {
         flex: 1;
       }
 
-      /* Custom City Combobox */
+      /* Sub-Modal (Search Engine Add/Edit, etc.) */
+      .sub-modal {
+        position: absolute;
+        inset: 0;
+        background: rgba(17, 17, 27, 0.75);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 100001;
+        border-radius: 12px;
+      }
+
+      .sub-modal.active {
+        display: flex;
+        animation: modalBackdropFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      .sub-modal.closing {
+        display: flex;
+        pointer-events: none;
+        animation: modalBackdropFadeOut 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      .sub-modal-dialog {
+        background: ${p.mantle};
+        border: 1px solid ${p.surface1};
+        border-radius: 10px;
+        width: 540px;
+        max-width: 92%;
+        max-height: 80vh;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        will-change: transform, opacity;
+      }
+
+      .sub-modal.active .sub-modal-dialog {
+        animation: modalDialogFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      .sub-modal.closing .sub-modal-dialog {
+        animation: modalDialogFadeOut 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      .sub-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        background: ${p.base};
+        border-bottom: 1px solid ${p.surface0};
+      }
+
+      .sub-modal-title {
+        font-family: 'Raleway', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: ${p.text};
+      }
+
+      .sub-modal-body {
+        padding: 18px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        overflow-y: auto;
+      }
+
+      .sub-modal-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 14px 20px;
+        background: ${p.base};
+        border-top: 1px solid ${p.surface0};
+      }
+
+      /* Search Engines List Items */
+      .search-engine-item {
+        background: ${p.base};
+        border: 1px solid ${p.surface0};
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        transition: border-color 0.15s ease;
+      }
+
+      .search-engine-item:hover {
+        border-color: ${p.surface1};
+      }
+
+      .search-engine-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .engine-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .engine-badge-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .engine-key-badge {
+        background: ${p.mantle};
+        border: 1px solid ${p.surface1};
+        color: ${p.blue};
+        font-family: monospace;
+        font-weight: 700;
+        font-size: 12px;
+        padding: 2px 7px;
+        border-radius: 4px;
+        letter-spacing: 0.5px;
+      }
+
+      .engine-name {
+        font-weight: 600;
+        font-size: 13.5px;
+        color: ${p.text};
+      }
+
+      .engine-url {
+        font-size: 12px;
+        color: ${p.subtext0};
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-family: monospace;
+      }
+
+      .engine-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+
+      .engine-form-card {
+        background: ${p.surface0};
+        border: 1px solid ${p.surface1};
+        border-radius: 8px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
       .combobox-wrapper {
         position: relative;
         width: 100%;
@@ -1593,6 +1772,16 @@ class Settings extends Component {
                 </div>
 
                 <div class="card">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                    <div>
+                      <div class="form-label" style="font-size: 14px; font-weight: 600; color: ${p.text};">Default Search Engine</div>
+                      <div class="form-hint">Choose your default search provider or manage engine shortcuts.</div>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-configure-engines">
+                      <i class="ti ti-settings"></i> Configure Engines
+                    </button>
+                  </div>
+
                   <div class="form-group">
                     <div class="custom-dropdown" data-id="gen-search-default">
                       <input type="hidden" id="gen-search-default" value="d">
@@ -1893,6 +2082,86 @@ class Settings extends Component {
               </div>
             </div>
           </div>
+
+          <!-- Configure Search Engines Sub-Modal -->
+          <div id="configure-engines-modal" class="sub-modal">
+            <div class="sub-modal-dialog">
+              <div class="sub-modal-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i class="ti ti-settings" style="font-size: 18px; color: ${p.blue};"></i>
+                  <span class="sub-modal-title">Configure Search Engines</span>
+                </div>
+                <button type="button" class="btn-close" id="btn-config-engines-close"><i class="ti ti-x"></i></button>
+              </div>
+              <div class="sub-modal-body">
+                <!-- Action bar -->
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                  <span style="font-size: 12.5px; color: ${p.subtext0};">Manage shortcut prefixes and search query URLs.</span>
+                  <button type="button" class="btn btn-secondary btn-sm" id="btn-open-add-engine">
+                    <i class="ti ti-plus"></i> Add Engine
+                  </button>
+                </div>
+
+                <!-- Configured Engines List -->
+                <div id="modal-engines-list">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+              <div class="sub-modal-footer">
+                <button type="button" class="btn btn-primary" id="btn-config-engines-done">Done</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add / Edit Search Engine Sub-Modal -->
+          <div id="engine-editor-modal" class="sub-modal" style="z-index: 100002;">
+            <div class="sub-modal-dialog" style="width: 480px;">
+              <div class="sub-modal-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i class="ti ti-search" style="font-size: 18px; color: ${p.blue};"></i>
+                  <span class="sub-modal-title" id="engine-editor-title">Add Search Engine</span>
+                </div>
+                <button type="button" class="btn-close" id="btn-engine-editor-close"><i class="ti ti-x"></i></button>
+              </div>
+              <div class="sub-modal-body">
+                <input type="hidden" id="engine-edit-old-key" value="">
+                <div class="form-group">
+                  <label class="form-label">Keyword / Prefix <span style="color: ${p.red};">*</span></label>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-family: monospace; font-size: 14px; font-weight: 700; color: ${p.blue}; padding: 7px 11px; background: ${p.surface0}; border: 1px solid ${p.surface1}; border-radius: 6px;">!</span>
+                    <input type="text" class="form-input" id="engine-key-input" placeholder="e.g. g, d, yt, wiki" style="flex: 1;" autocomplete="off">
+                  </div>
+                  <span class="form-hint">Shortcut prefix in the search bar (e.g. "!yt query" will search YouTube).</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Engine Name <span style="color: ${p.red};">*</span></label>
+                  <input type="text" class="form-input" id="engine-name-input" placeholder="e.g. Google, YouTube, Wikipedia" autocomplete="off">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Search Query URL <span style="color: ${p.red};">*</span></label>
+                  <input type="text" class="form-input" id="engine-url-input" placeholder="https://example.com/search?q=" autocomplete="off">
+                  <span class="form-hint">Endpoint URL where your search terms will be appended.</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Engine Icon</label>
+                  <div class="icon-preview-box" style="display: flex; align-items: center; gap: 8px;">
+                    <i class="ti ti-adjustments-horizontal icon-preview-display" id="engine-icon-preview" style="font-size: 20px; width: 28px; text-align: center; color: ${p.blue};"></i>
+                    <input type="text" class="form-input" id="engine-icon-input" placeholder="adjustments-horizontal" autocomplete="off" style="flex: 1;">
+                  </div>
+                  <span class="form-hint">Tabler icon name (defaults to <code>adjustments-horizontal</code> if left empty).</span>
+                  <div style="margin-top: 4px;">
+                    <a href="https://tabler.io/icons" target="_blank" class="link-external">
+                      <i class="ti ti-external-link"></i> Browse icon names on tabler.io/icons
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="sub-modal-footer">
+                <button type="button" class="btn btn-secondary" id="btn-engine-editor-cancel">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btn-engine-editor-save">Save Engine</button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- In-App Toast Notification -->
@@ -1987,6 +2256,16 @@ class Settings extends Component {
           this.shadow.querySelector('#btn-confirm-cancel').click();
           return;
         }
+        const editorModal = this.shadow.querySelector('#engine-editor-modal');
+        if (editorModal && editorModal.classList.contains('active') && !editorModal.classList.contains('closing')) {
+          this.closeEngineEditorModal();
+          return;
+        }
+        const engineModal = this.shadow.querySelector('#configure-engines-modal');
+        if (engineModal && engineModal.classList.contains('active') && !engineModal.classList.contains('closing')) {
+          this.closeConfigureEnginesModal();
+          return;
+        }
         const openDropdown = this.shadow.querySelector('.custom-dropdown.open');
         if (openDropdown) {
           this.closeAllDropdowns();
@@ -2013,6 +2292,23 @@ class Settings extends Component {
       window.removeEventListener('keydown', this.escapeHandler);
       this.escapeHandler = null;
     }
+
+    const modal = this.refs.modal;
+    modal.classList.add('closing');
+
+    const finalize = () => {
+      if (this.deactivateTimer) {
+        clearTimeout(this.deactivateTimer);
+        this.deactivateTimer = null;
+      }
+      modal.classList.remove('active', 'closing');
+      const subModals = this.shadow.querySelectorAll('.sub-modal, #confirm-modal');
+      subModals.forEach(m => m.classList.remove('active', 'closing'));
+      this.removeAttribute('active');
+      this.isDeactivating = false;
+    };
+
+    this.deactivateTimer = setTimeout(finalize, 180);
   }
 
   setDropdownValue(id, value) {
@@ -2698,6 +2994,82 @@ class Settings extends Component {
       clockSwitch.onchange = () => {
         clockControls.style.display = clockSwitch.checked ? 'block' : 'none';
       };
+    }
+
+    // Open Configure Engines modal
+    const btnConfigEngines = shadow.querySelector('#btn-configure-engines');
+    if (btnConfigEngines) {
+      btnConfigEngines.onclick = () => this.openConfigureEnginesModal();
+    }
+
+    // Configure Engines modal close & done buttons
+    const btnConfigClose = shadow.querySelector('#btn-config-engines-close');
+    if (btnConfigClose) btnConfigClose.onclick = () => this.closeConfigureEnginesModal();
+
+    const btnConfigDone = shadow.querySelector('#btn-config-engines-done');
+    if (btnConfigDone) btnConfigDone.onclick = () => this.closeConfigureEnginesModal();
+
+    // Close configure engines modal on backdrop click
+    const configEnginesModal = shadow.querySelector('#configure-engines-modal');
+    if (configEnginesModal) {
+      configEnginesModal.onclick = (e) => {
+        if (e.target === configEnginesModal) this.closeConfigureEnginesModal();
+      };
+    }
+
+    // Open Add Engine modal
+    const btnOpenAddEngine = shadow.querySelector('#btn-open-add-engine');
+    if (btnOpenAddEngine) {
+      btnOpenAddEngine.onclick = () => this.openEngineEditorModal('add');
+    }
+
+    // Engine Editor modal close, cancel & save buttons
+    const btnEditorClose = shadow.querySelector('#btn-engine-editor-close');
+    if (btnEditorClose) btnEditorClose.onclick = () => this.closeEngineEditorModal();
+
+    const btnEditorCancel = shadow.querySelector('#btn-engine-editor-cancel');
+    if (btnEditorCancel) btnEditorCancel.onclick = () => this.closeEngineEditorModal();
+
+    const btnEditorSave = shadow.querySelector('#btn-engine-editor-save');
+    if (btnEditorSave) btnEditorSave.onclick = () => this.saveEngineFromEditor();
+
+    // Close engine editor modal on backdrop click
+    const engineEditorModal = shadow.querySelector('#engine-editor-modal');
+    if (engineEditorModal) {
+      engineEditorModal.onclick = (e) => {
+        if (e.target === engineEditorModal) this.closeEngineEditorModal();
+      };
+    }
+
+    // Engine Icon input live preview
+    const engineIconInput = shadow.querySelector('#engine-icon-input');
+    const engineIconPreview = shadow.querySelector('#engine-icon-preview');
+    if (engineIconInput && engineIconPreview) {
+      engineIconInput.oninput = (e) => {
+        const iconVal = e.target.value.trim().replace(/^(ti\s+ti-|ti-)/, '').trim() || 'adjustments-horizontal';
+        engineIconPreview.className = `ti ti-${escapeHtml(iconVal)} icon-preview-display`;
+      };
+    }
+
+    // Enter key shortcuts inside engine editor modal inputs
+    ['#engine-key-input', '#engine-name-input', '#engine-url-input', '#engine-icon-input'].forEach(sel => {
+      const el = shadow.querySelector(sel);
+      if (el) {
+        el.onkeydown = (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            this.saveEngineFromEditor();
+          }
+        };
+      }
+    });
+
+    // Default search dropdown change listener on front page
+    const defaultSearchInput = shadow.querySelector('#gen-search-default');
+    if (defaultSearchInput) {
+      defaultSearchInput.addEventListener('change', (e) => {
+        this.draftConfig.search.default = e.target.value;
+      });
     }
 
     // Close any open custom dropdown when clicking outside
