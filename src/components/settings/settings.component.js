@@ -152,7 +152,7 @@ function resolveColourKey(iconColor) {
   return 'blue';
 }
 
-// Settings modal component - hidden GUI settings for startpage configuration
+// Settings modal component - hidden GUI settings for homepage configuration
 class Settings extends Component {
   refs = {
     modal: '#settings-modal',
@@ -165,6 +165,8 @@ class Settings extends Component {
     contentArea: '.modal-content',
     toast: '#settings-toast',
     confirmModal: '#confirm-modal',
+    sidebar: '.modal-sidebar',
+    sidebarToggle: '#btn-sidebar-toggle',
   };
 
   draftConfig = null;
@@ -208,13 +210,17 @@ class Settings extends Component {
         align-items: center;
         justify-content: center;
         z-index: 99999;
-        opacity: 0;
-        transition: opacity 0.2s ease-in-out;
       }
 
       #settings-modal.active {
         display: flex;
-        opacity: 1;
+        animation: modalBackdropFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      #settings-modal.closing {
+        display: flex;
+        pointer-events: none;
+        animation: modalBackdropFadeOut 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       }
 
       .modal-dialog {
@@ -231,6 +237,15 @@ class Settings extends Component {
         flex-direction: column;
         overflow: hidden;
         position: relative;
+        will-change: transform, opacity;
+      }
+
+      #settings-modal.active .modal-dialog {
+        animation: modalDialogFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      #settings-modal.closing .modal-dialog {
+        animation: modalDialogFadeOut 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       }
 
       .modal-header {
@@ -290,38 +305,80 @@ class Settings extends Component {
 
       .modal-sidebar {
         width: 230px;
+        flex-shrink: 0;
         background: ${p.mantle};
         border-right: 1px solid ${p.surface0};
-        padding: 16px 12px;
+        padding: 16px 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        user-select: none;
+        overflow: hidden;
+        box-sizing: border-box;
+        transition: width 0.25s cubic-bezier(0.2, 0, 0, 1);
+      }
+
+      .sidebar-nav {
         display: flex;
         flex-direction: column;
         gap: 6px;
-        user-select: none;
+        width: 100%;
       }
 
-      .nav-item {
+      .nav-item,
+      .sidebar-toggle-btn {
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 11px 14px;
+        padding: 10px 12px;
         border-radius: 8px;
         border: none;
         background: transparent;
         color: ${p.subtext0};
-        font-size: 14px;
         cursor: pointer;
         text-align: left;
         width: 100%;
-        transition: all 0.15s ease;
+        box-sizing: border-box;
+        white-space: nowrap;
+        overflow: hidden;
+        transition: background 0.15s ease, color 0.15s ease;
       }
 
-      .nav-item i {
-        font-size: 18px;
+      .nav-item i,
+      .sidebar-toggle-btn i {
+        font-size: 19px;
+        width: 20px;
+        height: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        line-height: 1;
       }
 
-      .nav-item:hover {
+      .nav-item span,
+      .sidebar-toggle-btn span {
+        font-size: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        opacity: 1;
+        transform: translateX(0);
+        transition: opacity 0.2s cubic-bezier(0.2, 0, 0, 1), transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+      }
+
+      .sidebar-toggle-btn span {
+        font-size: 13px;
+      }
+
+      .nav-item:hover,
+      .sidebar-toggle-btn:hover {
         background: ${p.surface0};
         color: ${p.text};
+      }
+
+      .sidebar-toggle-btn:hover {
+        color: ${p.blue};
       }
 
       .nav-item.active {
@@ -331,11 +388,32 @@ class Settings extends Component {
         box-shadow: inset 3px 0 0 ${p.blue};
       }
 
+      /* Compact Mode (Icon-Only, 64px) */
+      .modal-sidebar.compact {
+        width: 64px;
+      }
+
+      .modal-sidebar.compact .nav-item span,
+      .modal-sidebar.compact .sidebar-toggle-btn span {
+        opacity: 0;
+        transform: translateX(-8px);
+        pointer-events: none;
+      }
+
+      /* Sidebar Toggle (Compact / Full) */
+      .sidebar-toggle-wrap {
+        margin-top: auto;
+        padding-top: 8px;
+        border-top: 1px solid ${p.surface0};
+        width: 100%;
+      }
+
       .modal-content {
         flex: 1;
         padding: 24px 30px;
         overflow-y: auto;
         background: ${p.base};
+        min-width: 0;
       }
 
       .modal-content::-webkit-scrollbar {
@@ -364,6 +442,48 @@ class Settings extends Component {
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(4px); }
         to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      .ti-spin {
+        animation: spin 1s linear infinite;
+        display: inline-block;
+      }
+
+      @keyframes modalBackdropFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes modalBackdropFadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
+
+      @keyframes modalDialogFadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.96) translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      @keyframes modalDialogFadeOut {
+        from {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+        to {
+          opacity: 0;
+          transform: scale(0.96) translateY(10px);
+        }
       }
 
       .section-title {
@@ -621,8 +741,11 @@ class Settings extends Component {
         font-weight: 500;
         border: none;
         cursor: pointer;
-        transition: all 0.15s ease;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease, opacity 0.15s ease;
         user-select: none;
+        white-space: nowrap;
+        flex-shrink: 0;
+        box-sizing: border-box;
       }
 
       .btn-sm {
@@ -751,13 +874,19 @@ class Settings extends Component {
         display: none;
         align-items: center;
         justify-content: center;
-        z-index: 100001;
+        z-index: 100005;
         border-radius: 12px;
-        animation: fadeIn 0.15s ease-in-out;
       }
 
       #confirm-modal.active {
         display: flex;
+        animation: modalBackdropFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      #confirm-modal.closing {
+        display: flex;
+        pointer-events: none;
+        animation: modalBackdropFadeOut 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       }
 
       .confirm-dialog {
@@ -772,6 +901,15 @@ class Settings extends Component {
         display: flex;
         flex-direction: column;
         align-items: center;
+        will-change: transform, opacity;
+      }
+
+      #confirm-modal.active .confirm-dialog {
+        animation: modalDialogFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      #confirm-modal.closing .confirm-dialog {
+        animation: modalDialogFadeOut 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       }
 
       .confirm-icon {
@@ -1293,23 +1431,33 @@ class Settings extends Component {
           <!-- Body -->
           <div class="modal-body">
             <!-- Sidebar -->
-            <div class="modal-sidebar">
-              <button class="nav-item active" data-tab="general">
-                <i class="ti ti-adjustments"></i>
-                <span>General</span>
-              </button>
-              <button class="nav-item" data-tab="weather-clock">
-                <i class="ti ti-clock-hour-4"></i>
-                <span>Weather & Clock</span>
-              </button>
-              <button class="nav-item" data-tab="bookmarks">
-                <i class="ti ti-bookmarks"></i>
-                <span>Bookmarks Editor</span>
-              </button>
-              <button class="nav-item" data-tab="backup">
-                <i class="ti ti-database"></i>
-                <span>Backup & Sync</span>
-              </button>
+            <div class="modal-sidebar" id="modal-sidebar">
+              <div class="sidebar-nav">
+                <button class="nav-item active" data-tab="general" title="General">
+                  <i class="ti ti-adjustments"></i>
+                  <span>General</span>
+                </button>
+                <button class="nav-item" data-tab="weather-clock" title="Weather & Clock">
+                  <i class="ti ti-clock-hour-4"></i>
+                  <span>Weather & Clock</span>
+                </button>
+                <button class="nav-item" data-tab="bookmarks" title="Bookmarks Editor">
+                  <i class="ti ti-bookmarks"></i>
+                  <span>Bookmarks Editor</span>
+                </button>
+                <button class="nav-item" data-tab="backup" title="Backup & Sync">
+                  <i class="ti ti-database"></i>
+                  <span>Backup & Sync</span>
+                </button>
+              </div>
+
+              <!-- Sidebar Toggle Button (Compact / Full) -->
+              <div class="sidebar-toggle-wrap">
+                <button type="button" class="sidebar-toggle-btn" id="btn-sidebar-toggle" title="Collapse sidebar (Compact)">
+                  <i class="ti ti-layout-sidebar-left-collapse" id="sidebar-toggle-icon"></i>
+                  <span id="sidebar-toggle-label">Collapse</span>
+                </button>
+              </div>
             </div>
 
             <!-- Content -->
@@ -1446,47 +1594,17 @@ class Settings extends Component {
 
                 <div class="card">
                   <div class="form-group">
-                    <label class="form-label">Default Search Engine</label>
                     <div class="custom-dropdown" data-id="gen-search-default">
                       <input type="hidden" id="gen-search-default" value="d">
                       <button type="button" class="dropdown-trigger" aria-haspopup="listbox" aria-expanded="false">
                         <span class="dropdown-selected-content">
-                          <i class="ti ti-shield-check dropdown-icon"></i>
+                          <i class="ti ti-search dropdown-icon"></i>
                           <span>DuckDuckGo</span>
                         </span>
                         <i class="ti ti-chevron-down dropdown-arrow"></i>
                       </button>
                       <div class="dropdown-menu">
-                        <div class="dropdown-item selected" data-value="d">
-                          <div class="dropdown-item-left">
-                            <i class="ti ti-shield-check dropdown-icon"></i>
-                            <span>DuckDuckGo</span>
-                          </div>
-                          <div class="dropdown-item-right">
-                            <span class="dropdown-badge">!d</span>
-                            <i class="ti ti-check dropdown-check"></i>
-                          </div>
-                        </div>
-                        <div class="dropdown-item" data-value="g">
-                          <div class="dropdown-item-left">
-                            <i class="ti ti-brand-google dropdown-icon"></i>
-                            <span>Google</span>
-                          </div>
-                          <div class="dropdown-item-right">
-                            <span class="dropdown-badge">!g</span>
-                            <i class="ti ti-check dropdown-check"></i>
-                          </div>
-                        </div>
-                        <div class="dropdown-item" data-value="p">
-                          <div class="dropdown-item-left">
-                            <i class="ti ti-sparkles dropdown-icon"></i>
-                            <span>PerplexityAI</span>
-                          </div>
-                          <div class="dropdown-item-right">
-                            <span class="dropdown-badge">!p</span>
-                            <i class="ti ti-check dropdown-check"></i>
-                          </div>
-                        </div>
+                        <!-- Populated dynamically -->
                       </div>
                     </div>
                   </div>
@@ -1713,11 +1831,11 @@ class Settings extends Component {
 
                 <div class="card">
                   <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-                    <div>
+                    <div style="flex: 1; min-width: 0;">
                       <div class="form-label" style="font-size: 14px; margin-bottom: 4px;">Export Backup (JSON)</div>
                       <div class="form-hint">Export your personalised bookmarks and settings as a portable JSON backup file.</div>
                     </div>
-                    <button class="btn btn-secondary" id="btn-export-json">
+                    <button class="btn btn-secondary" id="btn-export-json" style="flex-shrink: 0; white-space: nowrap;">
                       <i class="ti ti-file-export"></i> Export JSON
                     </button>
                   </div>
@@ -1725,13 +1843,13 @@ class Settings extends Component {
 
                 <div class="card">
                   <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-                    <div>
+                    <div style="flex: 1; min-width: 0;">
                       <div class="form-label" style="font-size: 14px; margin-bottom: 4px;">Import Configuration (JS / JSON)</div>
                       <div class="form-hint">Load configuration from a userconfig.js file or a previously saved JSON file.</div>
                     </div>
-                    <div>
+                    <div style="flex-shrink: 0;">
                       <input type="file" id="file-import-input" accept=".js,.json" style="display: none;">
-                      <button class="btn btn-secondary" id="btn-trigger-import">
+                      <button class="btn btn-secondary" id="btn-trigger-import" style="white-space: nowrap;">
                         <i class="ti ti-upload"></i> Choose File
                       </button>
                     </div>
@@ -1740,11 +1858,11 @@ class Settings extends Component {
 
                 <div class="card" style="border-color: ${p.red}40;">
                   <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-                    <div>
+                    <div style="flex: 1; min-width: 0;">
                       <div class="form-label" style="font-size: 14px; color: ${p.red}; margin-bottom: 4px;">Reset to Default userconfig.js</div>
                       <div class="form-hint">Clear local browser storage and restore configuration from the project's userconfig.js file.</div>
                     </div>
-                    <button class="btn btn-danger" id="btn-reset-default">
+                    <button class="btn btn-danger" id="btn-reset-default" style="flex-shrink: 0; white-space: nowrap;">
                       <i class="ti ti-refresh"></i> Reset to Default
                     </button>
                   </div>
@@ -1820,27 +1938,36 @@ class Settings extends Component {
       okBtn.textContent = confirmText;
       okBtn.className = `btn btn-${confirmType}`;
 
+      modal.classList.remove('closing');
       modal.classList.add('active');
 
-      const cleanup = () => {
-        modal.classList.remove('active');
+      const cleanup = (confirmed) => {
         okBtn.onclick = null;
         cancelBtn.onclick = null;
+        modal.classList.add('closing');
+        setTimeout(() => {
+          modal.classList.remove('active', 'closing');
+          resolve(confirmed);
+        }, 180);
       };
 
       okBtn.onclick = () => {
-        cleanup();
-        resolve(true);
+        cleanup(true);
       };
 
       cancelBtn.onclick = () => {
-        cleanup();
-        resolve(false);
+        cleanup(false);
       };
     });
   }
 
   activate() {
+    if (this.deactivateTimer) {
+      clearTimeout(this.deactivateTimer);
+      this.deactivateTimer = null;
+    }
+    this.isDeactivating = false;
+    this.refs.modal.classList.remove('closing');
     this.setAttribute('active', '');
     this.draftConfig = JSON.parse(JSON.stringify(CONFIG));
     this.draftLight = localStorage.getItem('preferredLightTheme') || 'latte';
@@ -1856,7 +1983,7 @@ class Settings extends Component {
     this.escapeHandler = (e) => {
       if (e.key === 'Escape') {
         const confirmModal = this.shadow.querySelector('#confirm-modal');
-        if (confirmModal && confirmModal.classList.contains('active')) {
+        if (confirmModal && confirmModal.classList.contains('active') && !confirmModal.classList.contains('closing')) {
           this.shadow.querySelector('#btn-confirm-cancel').click();
           return;
         }
@@ -1879,8 +2006,8 @@ class Settings extends Component {
   }
 
   deactivate() {
-    this.removeAttribute('active');
-    this.refs.modal.classList.remove('active');
+    if (this.isDeactivating) return;
+    this.isDeactivating = true;
 
     if (this.escapeHandler) {
       window.removeEventListener('keydown', this.escapeHandler);
@@ -2414,8 +2541,59 @@ class Settings extends Component {
     }
   }
 
+  toggleSidebar(forceState = null) {
+    const shadow = this.shadow;
+    const sidebar = shadow.querySelector('.modal-sidebar');
+    const toggleBtn = shadow.querySelector('#btn-sidebar-toggle');
+    const toggleIcon = shadow.querySelector('#sidebar-toggle-icon');
+    const toggleLabel = shadow.querySelector('#sidebar-toggle-label');
+
+    if (!sidebar) return;
+
+    const isCurrentlyCompact = sidebar.classList.contains('compact');
+    const shouldBeCompact = forceState !== null 
+      ? forceState === 'compact'
+      : !isCurrentlyCompact;
+
+    if (shouldBeCompact) {
+      sidebar.classList.add('compact');
+      if (toggleBtn) toggleBtn.title = 'Expand sidebar (Full)';
+      if (toggleIcon) toggleIcon.className = 'ti ti-layout-sidebar-left-expand';
+      if (toggleLabel) toggleLabel.textContent = 'Expand';
+      localStorage.setItem('settings_sidebar_state', 'compact');
+    } else {
+      sidebar.classList.remove('compact');
+      if (toggleBtn) toggleBtn.title = 'Collapse sidebar (Compact)';
+      if (toggleIcon) toggleIcon.className = 'ti ti-layout-sidebar-left-collapse';
+      if (toggleLabel) toggleLabel.textContent = 'Collapse';
+      localStorage.setItem('settings_sidebar_state', 'full');
+    }
+  }
+
+  setupSidebarToggle() {
+    const shadow = this.shadow;
+    const toggleBtn = shadow.querySelector('#btn-sidebar-toggle');
+
+    // Restore saved state from localStorage (default: full)
+    const savedState = localStorage.getItem('settings_sidebar_state');
+    if (savedState === 'compact') {
+      this.toggleSidebar('compact');
+    }
+
+    if (toggleBtn) {
+      toggleBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.toggleSidebar();
+      };
+    }
+  }
+
   setEvents() {
     const shadow = this.shadow;
+
+    // Sidebar navigation panel toggle (Compact / Full)
+    this.setupSidebarToggle();
 
     // Close buttons (X and footer Close) - only close via X or Esc
     this.refs.closeBtn.onclick = () => this.deactivate();
