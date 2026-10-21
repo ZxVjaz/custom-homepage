@@ -42,7 +42,7 @@ class Links extends Component {
               .map(
                 (link) => `
                   <div class="link-info">
-                    <a href="${link.url}" target="_blank">
+                    <a href="${link.url}" target="_blank" data-color="${link.icon_color ?? ""}" data-name="${link.name ?? ""}">
                       ${Links.getIcon(link)}
                       ${link.name ? `<p class="link-name">${link.name}</p>` : ""}
                     </a>
@@ -349,9 +349,56 @@ class Tabs extends Component {
   }
 
   /**
+   * Bind delegated click listener for bookmark radial redirect animation
+   */
+  setEvents() {
+    if (this._eventsBound) return;
+    this._eventsBound = true;
+
+    this.shadow.addEventListener('click', (event) => {
+      const anchor = event.target.closest('.link-info a');
+      if (!anchor) return;
+
+      const href = anchor.getAttribute('href');
+      if (!href) return;
+
+      event.preventDefault();
+
+      const openInNewTab = Boolean(event.ctrlKey || event.metaKey);
+      const iconEl = anchor.querySelector('.link-icon');
+      const parentUl = anchor.closest('ul');
+      const computedFlavour = parentUl
+        ? getComputedStyle(parentUl).getPropertyValue('--flavour').trim()
+        : '';
+      const accentColor =
+        anchor.getAttribute('data-color') ||
+        (iconEl && iconEl.style.color) ||
+        computedFlavour ||
+        CONFIG.palette.blue;
+      const labelText = anchor.getAttribute('data-name') || anchor.textContent.trim();
+
+      if (typeof TransitionAnimator !== 'undefined') {
+        TransitionAnimator.playCardRedirect({
+          sourceEl: anchor,
+          iconEl,
+          labelText,
+          accentColor,
+          onComplete: () => {
+            TransitionAnimator.openUrl(href, openInNewTab);
+          },
+        });
+      } else {
+        window.open(href, openInNewTab ? '_blank' : '_self');
+      }
+    });
+  }
+
+  /**
    * Component lifecycle callback when element is connected to DOM
    */
   connectedCallback() {
-    this.render();
+    this.render().then(() => {
+      this.setEvents();
+    });
   }
 }
