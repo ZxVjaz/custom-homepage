@@ -1187,6 +1187,53 @@ class Settings extends Component {
         display: flex;
       }
 
+      .api-key-input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+
+      .api-key-input {
+        width: 100%;
+        padding-right: 38px;
+        font-family: inherit;
+      }
+
+      .api-key-input.masked {
+        -webkit-text-security: disc;
+        text-security: disc;
+      }
+
+      .api-key-toggle-btn {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: ${p.subtext0};
+        cursor: pointer;
+        padding: 5px 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: all 0.15s ease;
+        font-size: 15px;
+        line-height: 1;
+      }
+
+      .api-key-toggle-btn:hover {
+        color: ${p.text};
+        background: ${p.surface1};
+      }
+
+      .api-key-toggle-btn:focus-visible {
+        outline: 2px solid ${p.blue};
+        outline-offset: 1px;
+      }
+
       @keyframes comboboxFadeIn {
         from {
           opacity: 0;
@@ -1802,7 +1849,7 @@ class Settings extends Component {
 
               <!-- Tab 2: Weather & Clock -->
               <div class="tab-panel" id="tab-weather-clock">
-                <div class="section-title"><i class="ti ti-cloud-sun"></i> Weather Widget</div>
+                <div class="section-title"><i class="ti ti-sun"></i> Weather Widget</div>
                 <div class="section-desc">Configure weather display and OpenWeatherMap location.</div>
 
                 <div class="card">
@@ -1877,7 +1924,32 @@ class Settings extends Component {
 
                     <div class="form-group" style="margin-top: 14px;">
                       <label class="form-label">OpenWeatherMap API Key (Optional)</label>
-                      <input type="password" class="form-input" id="weather-appid" placeholder="Enter OpenWeatherMap API key...">
+                      <div class="api-key-input-wrap">
+                        <input
+                          type="text"
+                          class="form-input api-key-input masked"
+                          id="weather-appid"
+                          name="weather-api-key"
+                          placeholder="Enter OpenWeatherMap API key..."
+                          autocomplete="off"
+                          autocorrect="off"
+                          autocapitalize="off"
+                          spellcheck="false"
+                          data-lpignore="true"
+                          data-1p-ignore="true"
+                          data-bwignore="true"
+                          data-form-type="other"
+                        >
+                        <button
+                          type="button"
+                          class="api-key-toggle-btn"
+                          id="weather-appid-toggle"
+                          title="Show API key"
+                          aria-label="Show API key"
+                        >
+                          <i class="ti ti-eye"></i>
+                        </button>
+                      </div>
                       <span class="form-hint">Leave empty to keep the placeholder and skip network requests.</span>
                     </div>
                   </div>
@@ -2650,7 +2722,18 @@ class Settings extends Component {
 
     shadow.querySelector('#weather-location').value = this.draftConfig.temperature?.location || 'London';
     this.setDropdownValue('weather-scale', this.draftConfig.temperature?.scale || 'C');
-    shadow.querySelector('#weather-appid').value = this.draftConfig.temperature?.appId || '';
+    const apiKeyInput = shadow.querySelector('#weather-appid');
+    const apiKeyToggleBtn = shadow.querySelector('#weather-appid-toggle');
+    if (apiKeyInput) {
+      apiKeyInput.value = this.draftConfig.temperature?.appId || '';
+      apiKeyInput.classList.add('masked');
+      if (apiKeyToggleBtn) {
+        const icon = apiKeyToggleBtn.querySelector('i');
+        if (icon) icon.className = 'ti ti-eye';
+        apiKeyToggleBtn.title = 'Show API key';
+        apiKeyToggleBtn.setAttribute('aria-label', 'Show API key');
+      }
+    }
 
     const clockEnabled = !disabled.includes('current-time');
     shadow.querySelector('#clock-enabled').checked = clockEnabled;
@@ -3316,6 +3399,23 @@ class Settings extends Component {
     if (weatherSwitch && weatherControls) {
       weatherSwitch.onchange = () => {
         weatherControls.style.display = weatherSwitch.checked ? 'block' : 'none';
+      };
+    }
+
+    // Weather API key mask/reveal toggle (type="text" + text-security prevents 1Password/Chrome autofill)
+    const apiKeyInput = shadow.querySelector('#weather-appid');
+    const apiKeyToggleBtn = shadow.querySelector('#weather-appid-toggle');
+
+    if (apiKeyInput && apiKeyToggleBtn) {
+      apiKeyToggleBtn.onclick = () => {
+        const isMasked = apiKeyInput.classList.toggle('masked');
+        const icon = apiKeyToggleBtn.querySelector('i');
+        if (icon) {
+          icon.className = isMasked ? 'ti ti-eye' : 'ti ti-eye-off';
+        }
+        const label = isMasked ? 'Show API key' : 'Hide API key';
+        apiKeyToggleBtn.title = label;
+        apiKeyToggleBtn.setAttribute('aria-label', label);
       };
     }
 
