@@ -1,7 +1,7 @@
 // Service Worker for Catppuccin Homepage (PWA)
 // Enables 0-ms offline instant loading and manual user-controlled updates
 
-const APP_VERSION = 'v1.0.3';
+const APP_VERSION = 'v1.1.0';
 const CACHE_NAME = `catppuccin-homepage-${APP_VERSION}`;
 
 // Core static assets to precache on install
