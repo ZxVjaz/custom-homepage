@@ -24,9 +24,13 @@
   <img src="assets/preview.png"/>
 </p>
 
+> [!WARNING]
+> **This README is not fully documented.**
+> Some parts of this project are missing or incomplete here. Please explore the code and try it yourself. If something is unclear or broken, feel free to [open an issue](https://github.com/ZxVjaz/custom-homepage/issues).
+
 ## 🪴 Overview
 
-A Customisable homepage that uses the [**Catppuccin palettes**](https://catppuccin.com/palette). It is hosted on GitHub Pages. The page is based on [`catppuccin-startpage`](https://github.com/pivoshenko/catppuccin-startpage).
+A customizable homepage that uses the [**Catppuccin palettes**](https://catppuccin.com/palette). It is hosted on GitHub Pages. The page is based on [`catppuccin-startpage`](https://github.com/pivoshenko/catppuccin-startpage).
 
 ### 🎨 Supported Palettes
 
@@ -43,7 +47,7 @@ A Customisable homepage that uses the [**Catppuccin palettes**](https://catppucc
 - Customizable page title and favicon (browser tab + statusbar icon)
 - Customizable animation playback speed for bookmarks and search (with 0x instant mode)
 - Visual banner picker with previews for all 18 preset animations and custom image/GIF uploads (Base64)
-- Customisable startpage / bookmarks manager
+- Customizable startpage / bookmarks manager
 - Search bar with multiple engines and quick command triggers
 - Weather widget with location search combobox
 - Clock widget with 12/24-hour format and multiple time zones support
@@ -59,23 +63,6 @@ A Customisable homepage that uses the [**Catppuccin palettes**](https://catppucc
 1. Open https://zxvjaz.github.io/custom-homepage/
 2. Configure as you like and enjoy!
 
-### As Homepage
-
-- Click the menu button and select `Options/Preferences`
-- Click the home panel
-- Click the menu next to 'Homepage and new windows', choose to show custom URLs, and add your GitHub Pages link
-
-### As New Tab
-
-You can use different add-ons or extensions for this.
-
-- If you use Firefox-based browsers: [Custom New Tab Page](https://addons.mozilla.org/en-US/firefox/addon/custom-new-tab-page/?src=search) and make sure to enable "Force links to open in the top frame (experimental)" in the extension's preferences page
-- If you use Chromium-based browsers (Brave / Chrome): [Custom New Tab URL](https://chrome.google.com/webstore/detail/custom-new-tab-url/mmjbdbjnoablegbkcklggeknkfcjkjia)
-
-## 🛠️ Development
-
-For local viewing, run `python3 -m http.server 8000` from the repository root and open `http://localhost:8000`. note: you need python to do this.
-
 ### 🔎 Search
 
 <p align="center">
@@ -89,15 +76,26 @@ To pick an engine, prefix the query with its `!<id>`. The engines defined by def
 - `!g`: Google
 - `!d`: DuckDuckGo
 
-You can also open the visual settings modal directly from search by typing `:settings` and pressing `Enter`.
+### As Homepage
 
-## ⚙️ Settings & Customisation
+- Click the menu button and select `Options/Preferences`
+- Click the home panel
+- Click the menu next to 'Homepage and new windows', choose to show custom URLs, and add your GitHub Pages link
+
+### As New Tab
+
+You can use different add-ons or extensions for this.
+
+- If you use Firefox-based browsers: [Custom New Tab Page](https://addons.mozilla.org/en-US/firefox/addon/custom-new-tab-page/?src=search) and make sure to enable "Force links to open in the top frame (experimental)" in the extension's preferences page
+- If you use Chromium-based browsers (Brave / Chrome): [Custom New Tab URL](https://chrome.google.com/webstore/detail/custom-new-tab-url/mmjbdbjnoablegbkcklggeknkfcjkjia)
+
+## ⚙️ Settings & Customization
 
 <p align="center">
   <img src="assets/preview.settings.png"/>
 </p>
 
-The startpage features a built-in visual configuration modal, allowing you to customise your setup directly in the browser without modifying code.
+The startpage features a built-in visual configuration modal, allowing you to customize your setup directly in the browser without modifying code.
 
 ### Opening the Settings Modal
 
@@ -107,13 +105,24 @@ The startpage features a built-in visual configuration modal, allowing you to cu
 
 ### Configuration Sections
 
-- **General**: Select your preferred light and dark Catppuccin flavour (Latte, Frappé, Macchiato, Mocha), set a custom Page Title and Favicon Image, adjust animation playback speed sliders for bookmarks and search (with 0x instant mode), set a fastlink URL, and choose your default search engine.
-- **Weather & Clock**: Toggle the weather and clock widgets on or off, search for your city from a built-in global and regional database with aliases, configure temperature units (°C / °F) and OpenWeatherMap API key, and customise clock formatting or multiple time zones.
-- **Bookmarks & Tabs**: Visually organise tabs, choose banner GIF animations from the built-in preset picker gallery (1-18) or upload custom local images/GIFs stored as Base64 Data URLs, manage categories, and add or edit links with live Tabler icon previews and Catppuccin palette colour pickers.
+- **General**: Select your preferred light and dark Catppuccin flavor (Latte, Frappé, Macchiato, Mocha), set a custom Page Title and Favicon Image, adjust animation playback speed sliders for bookmarks and search (with 0x instant mode), set a fastlink URL, and choose your default search engine.
+- **Weather & Clock**: Toggle the weather and clock widgets on or off, search for your city from a built-in global and regional database with aliases, configure temperature units (°C / °F) and your [OpenWeatherMap](https://openweathermap.org/api) API key, and customize clock formatting or multiple time zones.
+- **Bookmarks & Tabs**: Visually organize tabs, choose banner GIF animations from the built-in preset picker gallery (1-18) or upload custom local images/GIFs stored as Base64 Data URLs, manage categories, and add or edit links with live Tabler icon previews and Catppuccin palette color pickers.
 - **Backup & Sync**: Export your configuration as a standalone `.json` backup file, import an existing JSON or `userconfig.js` file, or restore default settings with a single click.
 
 > [!NOTE]
 > Settings configured through the GUI take precedence and are stored in your browser's `localStorage`. For a complete guide on manual configuration via code, check out [**`docs/userconfig-guide.md`**](docs/userconfig-guide.md).
+
+## 🛠️ Development
+
+For local viewing, run `python3 -m http.server 8000` from the repository root and open `http://localhost:8000`.
+
+> [!NOTE]
+> This requires Python to be installed.
+
+## 🤝 Contributing
+
+Found a bug or something that is unclear? Please [open an issue](https://github.com/ZxVjaz/custom-homepage/issues).
 
 ## 🖼️ Available Banners
 
