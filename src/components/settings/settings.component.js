@@ -610,6 +610,59 @@ class Settings extends Component {
         padding: 10px 14px;
       }
 
+      .range-slider-wrap {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .range-slider {
+        flex: 1;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 6px;
+        border-radius: 999px;
+        background: ${p.surface1};
+        outline: none;
+        cursor: pointer;
+        transition: background 0.15s ease;
+      }
+      .range-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: ${p.blue};
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        transition: transform 0.12s ease, background 0.15s ease;
+      }
+      .range-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.15);
+        background: ${p.sapphire || p.blue};
+      }
+      .range-slider::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: ${p.blue};
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+      }
+      .range-value-badge {
+        font-family: 'Roboto', monospace, sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: ${p.text};
+        background: ${p.surface0};
+        border: 1px solid ${p.surface1};
+        padding: 4px 10px;
+        border-radius: 6px;
+        min-width: 60px;
+        text-align: center;
+      }
+
       .form-grid-2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -1097,6 +1150,50 @@ class Settings extends Component {
         font-weight: 600;
         font-size: 13.5px;
         color: ${p.text};
+      }
+
+      /* Banner Picker Modal & Grid */
+      .banner-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        max-height: 440px;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+      .banner-grid-item {
+        background: ${p.surface0};
+        border: 2px solid ${p.surface1};
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.14s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        display: flex;
+        flex-direction: column;
+      }
+      .banner-grid-item:hover {
+        transform: translateY(-2px);
+        border-color: ${p.blue};
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+      }
+      .banner-grid-item.selected {
+        border-color: ${p.green};
+        box-shadow: 0 0 0 2px ${p.green}40;
+      }
+      .banner-grid-preview {
+        width: 100%;
+        height: 75px;
+        object-fit: cover;
+        background: ${p.crust};
+        display: block;
+      }
+      .banner-grid-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-align: center;
+        padding: 5px 4px;
+        color: ${p.subtext1};
+        background: ${p.mantle};
       }
 
       .engine-url {
@@ -1811,6 +1908,45 @@ class Settings extends Component {
 
 
                 <div class="card">
+                  <div class="form-grid-2">
+                    <div class="form-group">
+                      <label class="form-label">Page Title</label>
+                      <input type="text" class="form-input" id="gen-title" placeholder="~/.config">
+                      <span class="form-hint">Homepage title displayed in the browser tab.</span>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Favicon Image URL</label>
+                      <input type="text" class="form-input" id="gen-favicon" placeholder="src/img/favicon.png">
+                      <span class="form-hint">Icon for browser tab and statusbar fastlink button.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div class="form-group" style="margin-bottom: 18px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                      <label class="form-label" style="margin-bottom: 0;">Bookmark Animation Speed</label>
+                      <span class="range-value-badge" id="gen-anim-bookmark-val">1.0x</span>
+                    </div>
+                    <div class="range-slider-wrap">
+                      <input type="range" class="range-slider" id="gen-anim-bookmark" min="0" max="2.5" step="0.1" value="1.0">
+                    </div>
+                    <span class="form-hint">Adjust playback speed for bookmark clicks.</span>
+                  </div>
+
+                  <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                      <label class="form-label" style="margin-bottom: 0;">Search Animation Speed</label>
+                      <span class="range-value-badge" id="gen-anim-search-val">1.0x</span>
+                    </div>
+                    <div class="range-slider-wrap">
+                      <input type="range" class="range-slider" id="gen-anim-search" min="0" max="2.5" step="0.1" value="1.0">
+                    </div>
+                    <span class="form-hint">Adjust playback speed when opening search & pressing Enter.</span>
+                  </div>
+                </div>
+
+                <div class="card">
                   <div class="form-group">
                     <label class="form-label">Fastlink URL</label>
                     <input type="text" class="form-input" id="gen-fastlink" placeholder="https://example.com">
@@ -2249,6 +2385,37 @@ class Settings extends Component {
               </div>
             </div>
           </div>
+          <!-- Banner Picker Sub-Modal -->
+          <div id="banner-picker-modal" class="sub-modal" style="z-index: 100003;">
+            <div class="sub-modal-dialog" style="width: 600px;">
+              <div class="sub-modal-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i class="ti ti-photo" style="font-size: 18px; color: ${p.peach};"></i>
+                  <span class="sub-modal-title">Choose Tab Banner</span>
+                </div>
+                <button type="button" class="btn-close" id="btn-banner-picker-close"><i class="ti ti-x"></i></button>
+              </div>
+              <div class="sub-modal-body" style="padding: 16px 20px;">
+                <input type="hidden" id="banner-picker-target-tidx" value="">
+                <div class="form-group" style="margin-bottom: 14px;">
+                  <label class="form-label">Custom Image URL or Path</label>
+                  <div style="display: flex; gap: 8px;">
+                    <input type="text" class="form-input" id="banner-custom-url-input" placeholder="e.g. src/img/banners/banner_01.gif or https://example.com/banner.gif" style="flex: 1;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-apply-custom-banner">Apply URL</button>
+                  </div>
+                </div>
+
+                <div class="form-label" style="margin-bottom: 8px; font-weight: 600;">Or Select from Preset Banners (1 - 18)</div>
+                <div class="banner-grid" id="banner-presets-grid">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+              <div class="sub-modal-footer">
+                <button type="button" class="btn btn-secondary" id="btn-banner-picker-cancel">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btn-banner-picker-select">Select Banner</button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- In-App Toast Notification -->
@@ -2432,6 +2599,46 @@ class Settings extends Component {
     const shadow = this.shadow;
     this.setDropdownValue('gen-theme-light', this.draftLight);
     this.setDropdownValue('gen-theme-dark', this.draftDark);
+    shadow.querySelector('#gen-title').value = this.draftConfig.title || '~/.config';
+    shadow.querySelector('#gen-favicon').value = this.draftConfig.favicon || 'src/img/favicon.png';
+
+    const cfgSpeed = this.draftConfig.animationSpeed;
+    let bSpeed = 1.0;
+    let sSpeed = 1.0;
+    if (typeof cfgSpeed === 'number') {
+      bSpeed = cfgSpeed;
+      sSpeed = cfgSpeed;
+    } else if (cfgSpeed && typeof cfgSpeed === 'object') {
+      if (typeof cfgSpeed.bookmark === 'number') bSpeed = cfgSpeed.bookmark;
+      if (typeof cfgSpeed.search === 'number') sSpeed = cfgSpeed.search;
+    }
+
+    const formatSpeedLabel = (val) => {
+      const num = parseFloat(val);
+      if (num <= 0) return 'Off (0x)';
+      return `${num.toFixed(1)}x`;
+    };
+
+    const bSlider = shadow.querySelector('#gen-anim-bookmark');
+    const bDisplay = shadow.querySelector('#gen-anim-bookmark-val');
+    if (bSlider && bDisplay) {
+      bSlider.value = bSpeed;
+      bDisplay.textContent = formatSpeedLabel(bSpeed);
+      bSlider.oninput = (e) => {
+        bDisplay.textContent = formatSpeedLabel(e.target.value);
+      };
+    }
+
+    const sSlider = shadow.querySelector('#gen-anim-search');
+    const sDisplay = shadow.querySelector('#gen-anim-search-val');
+    if (sSlider && sDisplay) {
+      sSlider.value = sSpeed;
+      sDisplay.textContent = formatSpeedLabel(sSpeed);
+      sSlider.oninput = (e) => {
+        sDisplay.textContent = formatSpeedLabel(e.target.value);
+      };
+    }
+
     shadow.querySelector('#gen-fastlink').value = this.draftConfig.fastlink || '';
 
     // Ensure search config and engines structure
@@ -2630,6 +2837,55 @@ class Settings extends Component {
     this.renderConfigureEnginesList();
     this.updateSearchDefaultDropdown();
     this.showToast(oldKey ? `Search engine "${name}" updated!` : `Search engine "${name}" added!`, 'success');
+  }
+
+  openBannerPicker(tIdx) {
+    const shadow = this.shadow;
+    const modal = shadow.querySelector('#banner-picker-modal');
+    if (!modal) return;
+
+    shadow.querySelector('#banner-picker-target-tidx').value = tIdx;
+    const currentBanner = (this.draftConfig.tabs[tIdx]?.background_url || '').trim();
+    shadow.querySelector('#banner-custom-url-input').value = currentBanner;
+
+    // Render 18 preset banners
+    const grid = shadow.querySelector('#banner-presets-grid');
+    const presets = [];
+    for (let i = 1; i <= 18; i++) {
+      const num = String(i).padStart(2, '0');
+      presets.push(`src/img/banners/banner_${num}.gif`);
+    }
+
+    grid.innerHTML = presets.map((path, idx) => {
+      const num = String(idx + 1).padStart(2, '0');
+      const isSel = currentBanner === path;
+      return `
+        <div class="banner-grid-item ${isSel ? 'selected' : ''}" data-banner="${path}">
+          <img src="${path}" class="banner-grid-preview" alt="Banner ${num}" loading="lazy">
+          <div class="banner-grid-label">banner_${num}.gif</div>
+        </div>
+      `;
+    }).join('');
+
+    grid.querySelectorAll('.banner-grid-item').forEach(item => {
+      item.onclick = () => {
+        grid.querySelectorAll('.banner-grid-item').forEach(it => it.classList.remove('selected'));
+        item.classList.add('selected');
+        shadow.querySelector('#banner-custom-url-input').value = item.dataset.banner;
+      };
+    });
+
+    modal.classList.remove('closing');
+    modal.classList.add('active');
+  }
+
+  closeBannerPicker() {
+    const modal = this.shadow.querySelector('#banner-picker-modal');
+    if (!modal || !modal.classList.contains('active')) return;
+    modal.classList.add('closing');
+    setTimeout(() => {
+      modal.classList.remove('active', 'closing');
+    }, 180);
   }
 
   renderConfigureEnginesList() {
@@ -2843,6 +3099,9 @@ class Settings extends Component {
             <i class="ti ti-folder" style="font-size: 18px; color: ${CONFIG.palette.peach};"></i>
             <input type="text" class="form-input tab-name-input" data-tidx="${tIdx}" value="${escapeHtml(tab.name || '')}" placeholder="Tab Name (e.g. myself)" style="width: 150px;">
             <input type="text" class="form-input tab-bg-input" data-tidx="${tIdx}" value="${escapeHtml(tab.background_url || '')}" placeholder="Banner URL (e.g. src/img/banners/banner_01.gif)" style="flex: 1;">
+            <button type="button" class="btn btn-secondary btn-sm btn-open-banner-picker" data-tidx="${tIdx}" title="Choose Banner from Presets">
+              <i class="ti ti-photo"></i> Choose Banner
+            </button>
           </div>
           <button class="btn btn-danger btn-sm btn-del-tab" data-tidx="${tIdx}">
             <i class="ti ti-trash"></i> Delete Tab
@@ -2952,6 +3211,15 @@ class Settings extends Component {
     });
     container.querySelectorAll('.tab-bg-input').forEach(el => {
       el.oninput = (e) => { tabs[e.target.dataset.tidx].background_url = e.target.value; };
+    });
+
+    // Open Banner Picker Modal
+    container.querySelectorAll('.btn-open-banner-picker').forEach(el => {
+      el.onclick = (e) => {
+        const btn = e.target.closest('.btn-open-banner-picker');
+        const tIdx = parseInt(btn.dataset.tidx);
+        this.openBannerPicker(tIdx);
+      };
     });
 
     // Delete Tab with custom in-app confirmation modal
@@ -3089,6 +3357,14 @@ class Settings extends Component {
     const shadow = this.shadow;
     this.draftLight = shadow.querySelector('#gen-theme-light').value;
     this.draftDark = shadow.querySelector('#gen-theme-dark').value;
+    this.draftConfig.title = (shadow.querySelector('#gen-title')?.value || '').trim() || '~/.config';
+    this.draftConfig.favicon = (shadow.querySelector('#gen-favicon')?.value || '').trim() || 'src/img/favicon.png';
+    const bSpeedRaw = shadow.querySelector('#gen-anim-bookmark')?.value;
+    const sSpeedRaw = shadow.querySelector('#gen-anim-search')?.value;
+    this.draftConfig.animationSpeed = {
+      bookmark: bSpeedRaw !== undefined ? parseFloat(bSpeedRaw) : 1.0,
+      search: sSpeedRaw !== undefined ? parseFloat(sSpeedRaw) : 1.0,
+    };
     this.draftConfig.fastlink = shadow.querySelector('#gen-fastlink').value.trim();
 
     if (!this.draftConfig.search) this.draftConfig.search = {};
@@ -3494,6 +3770,37 @@ class Settings extends Component {
         };
       }
     });
+
+    // Banner Picker modal events
+    const btnBannerClose = shadow.querySelector('#btn-banner-picker-close');
+    if (btnBannerClose) btnBannerClose.onclick = () => this.closeBannerPicker();
+
+    const btnBannerCancel = shadow.querySelector('#btn-banner-picker-cancel');
+    if (btnBannerCancel) btnBannerCancel.onclick = () => this.closeBannerPicker();
+
+    const bannerPickerModal = shadow.querySelector('#banner-picker-modal');
+    if (bannerPickerModal) {
+      bannerPickerModal.onclick = (e) => {
+        if (e.target === bannerPickerModal) this.closeBannerPicker();
+      };
+    }
+
+    const applySelectedBanner = () => {
+      const tIdx = parseInt(shadow.querySelector('#banner-picker-target-tidx').value);
+      const chosenUrl = (shadow.querySelector('#banner-custom-url-input').value || '').trim();
+      if (!isNaN(tIdx) && this.draftConfig.tabs[tIdx]) {
+        this.draftConfig.tabs[tIdx].background_url = chosenUrl;
+        this.renderBookmarksTree();
+        this.showToast(`Updated banner for tab "${this.draftConfig.tabs[tIdx].name || tIdx + 1}"`, 'success');
+      }
+      this.closeBannerPicker();
+    };
+
+    const btnBannerSelect = shadow.querySelector('#btn-banner-picker-select');
+    if (btnBannerSelect) btnBannerSelect.onclick = applySelectedBanner;
+
+    const btnApplyCustomBanner = shadow.querySelector('#btn-apply-custom-banner');
+    if (btnApplyCustomBanner) btnApplyCustomBanner.onclick = applySelectedBanner;
 
     // Default search dropdown change listener on front page
     const defaultSearchInput = shadow.querySelector('#gen-search-default');

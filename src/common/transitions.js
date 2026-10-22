@@ -11,6 +11,53 @@ class TransitionAnimator {
   static _iconCache = new Map();
 
   /**
+   * Resolve speed multiplier for a specific transition type ('bookmark', 'search', or fallback)
+   * @param {string} [type] - 'bookmark' | 'search'
+   * @returns {number}
+   */
+  static getSpeedMultiplier(type) {
+    if (typeof CONFIG === 'undefined') return 1.0;
+    const cfgSpeed = CONFIG.animationSpeed;
+    if (typeof cfgSpeed === 'number') {
+      return cfgSpeed;
+    }
+    if (cfgSpeed && typeof cfgSpeed === 'object') {
+      if (type && typeof cfgSpeed[type] === 'number') {
+        return cfgSpeed[type];
+      }
+      if (typeof cfgSpeed.search === 'number' && (type === 'search' || type === 'modal')) {
+        return cfgSpeed.search;
+      }
+      if (typeof cfgSpeed.bookmark === 'number' && type === 'bookmark') {
+        return cfgSpeed.bookmark;
+      }
+    }
+    return 1.0;
+  }
+
+  /**
+   * Calculate adjusted duration in milliseconds based on CONFIG.animationSpeed
+   * If animationSpeed is 0, returns 0 for instant execution
+   * @param {number} baseMs
+   * @param {string} [type] - 'bookmark' | 'search'
+   * @returns {number}
+   */
+  static getDuration(baseMs, type) {
+    const speed = TransitionAnimator.getSpeedMultiplier(type);
+    if (speed <= 0) return 0;
+    return Math.round(baseMs * speed);
+  }
+
+  /**
+   * Determine whether transition animations should be played or bypassed instantly
+   * @param {string} [type] - 'bookmark' | 'search'
+   * @returns {boolean}
+   */
+  static isAnimationDisabled(type) {
+    return TransitionAnimator.getSpeedMultiplier(type) <= 0;
+  }
+
+  /**
    * Check whether a Tabler icon class actually has a glyph in tabler-icons.min.css
    * @param {string} iconClass - e.g. 'ti-brand-duckduckgo' or 'brand-google'
    * @returns {boolean}
@@ -146,10 +193,15 @@ class TransitionAnimator {
       TransitionAnimator.cleanup();
       return;
     }
+    const scaledDuration = TransitionAnimator.getDuration(durationMs);
+    if (scaledDuration === 0) {
+      TransitionAnimator.cleanup();
+      return;
+    }
     try {
       const anim = overlay.animate(
         [{ opacity: 1 }, { opacity: 0 }],
-        { duration: durationMs, easing: 'ease-out', fill: 'forwards' }
+        { duration: scaledDuration, easing: 'ease-out', fill: 'forwards' }
       );
       await anim.finished;
     } catch (_) {
@@ -197,6 +249,13 @@ class TransitionAnimator {
     onComplete,
   }) {
     if (TransitionAnimator.isAnimating) return;
+    if (TransitionAnimator.isAnimationDisabled('search')) {
+      if (typeof onComplete === 'function') {
+        onComplete();
+      }
+      return;
+    }
+
     TransitionAnimator.cleanup();
     TransitionAnimator.isAnimating = true;
 
@@ -471,7 +530,7 @@ class TransitionAnimator {
         { left: `${startX}px`, transform: 'translate(-50%, -50%)', opacity: 1, offset: 0.38 },
         { left: `${width / 2}px`, transform: 'translate(-50%, -50%)', opacity: 1 },
       ],
-      { duration: 640, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
+      { duration: TransitionAnimator.getDuration(640, 'search'), easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
     );
 
     // Reverse-scale badge ring up to native scale(1) for 100% vector-sharp icon
@@ -481,14 +540,14 @@ class TransitionAnimator {
         { transform: 'scale(1.05)', offset: 0.75 },
         { transform: 'scale(1)' },
       ],
-      { duration: 600, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
+      { duration: TransitionAnimator.getDuration(600, 'search'), easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
     );
 
     // Phase 1: Wave springs out from left edge (240ms)
     await TransitionAnimator.animateParams(
       stage0,
       stage1,
-      240,
+      TransitionAnimator.getDuration(240, 'search'),
       TransitionAnimator.easeOutCubic,
       updatePaths
     );
@@ -499,7 +558,7 @@ class TransitionAnimator {
     await TransitionAnimator.animateParams(
       stage1,
       stage2,
-      220,
+      TransitionAnimator.getDuration(220, 'search'),
       TransitionAnimator.easeInOutQuad,
       updatePaths
     );
@@ -510,7 +569,7 @@ class TransitionAnimator {
     await TransitionAnimator.animateParams(
       stage2,
       stage3,
-      200,
+      TransitionAnimator.getDuration(200, 'search'),
       TransitionAnimator.easeOutCubic,
       updatePaths
     );
@@ -536,6 +595,13 @@ class TransitionAnimator {
    */
   static async playSettingsPortal({ originEl, onComplete } = {}) {
     if (TransitionAnimator.isAnimating) return;
+    if (TransitionAnimator.isAnimationDisabled('search')) {
+      if (typeof onComplete === 'function') {
+        onComplete();
+      }
+      return;
+    }
+
     TransitionAnimator.cleanup();
     TransitionAnimator.isAnimating = true;
 
@@ -639,7 +705,7 @@ class TransitionAnimator {
         { background: 'rgba(17, 17, 27, 0)', backdropFilter: 'blur(0px)' },
         { background: 'rgba(17, 17, 27, 0.75)', backdropFilter: 'blur(10px)' },
       ],
-      { duration: 300, easing: 'ease-out', fill: 'forwards' }
+      { duration: TransitionAnimator.getDuration(300, 'search'), easing: 'ease-out', fill: 'forwards' }
     );
 
     // 2. Spin gear icon 120deg in native HD resolution
@@ -649,7 +715,7 @@ class TransitionAnimator {
         { transform: 'rotate(30deg) scale(1.05)', color: blue, offset: 0.7 },
         { transform: 'rotate(60deg) scale(0.9)', color: blue, opacity: 0 },
       ],
-      { duration: 520, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
+      { duration: TransitionAnimator.getDuration(520, 'search'), easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
     );
 
     badgeTitle.animate(
@@ -658,7 +724,7 @@ class TransitionAnimator {
         { opacity: 1, transform: 'translateY(0px)', offset: 0.5 },
         { opacity: 0, transform: 'translateY(-6px)' },
       ],
-      { duration: 480, easing: 'ease-in-out', fill: 'forwards' }
+      { duration: TransitionAnimator.getDuration(480, 'search'), easing: 'ease-in-out', fill: 'forwards' }
     );
 
     // 3. Stage A: Pop badge to center (280ms), Stage B: Expand badge into Settings Modal dimensions (240ms)
@@ -694,7 +760,7 @@ class TransitionAnimator {
           transform: 'translate(-50%, -50%) scale(1)',
         },
       ],
-      { duration: 520, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
+      { duration: TransitionAnimator.getDuration(520, 'search'), easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
     );
 
     try {
@@ -724,6 +790,13 @@ class TransitionAnimator {
     onComplete,
   }) {
     if (TransitionAnimator.isAnimating) return;
+    if (TransitionAnimator.isAnimationDisabled('bookmark')) {
+      if (typeof onComplete === 'function') {
+        onComplete();
+      }
+      return;
+    }
+
     TransitionAnimator.cleanup();
     TransitionAnimator.isAnimating = true;
 
@@ -869,7 +942,7 @@ class TransitionAnimator {
         { clipPath: `circle(${maxRadius}px at ${originX}px ${originY}px)` },
       ],
       {
-        duration: 620,
+        duration: TransitionAnimator.getDuration(620, 'bookmark'),
         easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
         fill: 'forwards',
       }
@@ -881,8 +954,8 @@ class TransitionAnimator {
         { left: `${vw / 2}px`, top: `${vh / 2}px` },
       ],
       {
-        delay: 90,
-        duration: 360,
+        delay: TransitionAnimator.getDuration(90, 'bookmark'),
+        duration: TransitionAnimator.getDuration(360, 'bookmark'),
         easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
         fill: 'forwards',
       }
@@ -911,8 +984,8 @@ class TransitionAnimator {
         },
       ],
       {
-        delay: 90,
-        duration: 380,
+        delay: TransitionAnimator.getDuration(90, 'bookmark'),
+        duration: TransitionAnimator.getDuration(380, 'bookmark'),
         easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
         fill: 'forwards',
       }
@@ -925,8 +998,8 @@ class TransitionAnimator {
           { opacity: 1, transform: 'translateY(0px)' },
         ],
         {
-          delay: 220,
-          duration: 240,
+          delay: TransitionAnimator.getDuration(220, 'bookmark'),
+          duration: TransitionAnimator.getDuration(240, 'bookmark'),
           easing: 'ease-out',
           fill: 'forwards',
         }

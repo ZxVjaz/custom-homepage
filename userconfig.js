@@ -8,6 +8,17 @@ let palette = initThemeSystem(preferredLightTheme, preferredDarkTheme);
 
 const default_configuration = {
   overrideStorage: true,
+  // Page title displayed in the browser tab
+  title: "~/.config",
+  // Custom favicon image URL/path (used for browser tab icon and fastlink button in statusbar)
+  favicon: "src/img/favicon.png",
+  // Transition animation speed multiplier:
+  // Recommended range: 0.1 (very fast) to 2.5 (cinematic slow), step 0.1 (ex: 0.1, 0.2, 0.3)
+  // Set to 0 to disable animations entirely (instant navigation). Max recommended limit: 2.5
+  animationSpeed: {
+    bookmark: 1.0, // Speed for bookmark click animations
+    search: 1.0,   // Speed when opening search & performing a search (pressing Enter)
+  },
   temperature: {
     location: "London",
     scale: "C",

@@ -2,6 +2,12 @@ class Config {
   // Default configuration values for the homepage - these can be overridden by user configuration or local storage
   defaults = {
     overrideStorage: false,
+    title: "~/.config",
+    favicon: "src/img/favicon.png",
+    animationSpeed: {
+      bookmark: 1.0,
+      search: 1.0,
+    },
     temperature: {
       location: "London",
       // Temperature scale: C for Celsius, F for Fahrenheit
@@ -55,6 +61,7 @@ class Config {
 
     this.autoConfig();
     this.setKeybindings();
+    this.applyDocumentMeta();
     this.save();
 
     // Use a Proxy to automatically persist configuration changes
@@ -77,6 +84,10 @@ class Config {
 
     Reflect.set(target, prop, val);
     Object.assign(this, target);
+
+    if (prop === 'title' || prop === 'favicon') {
+      this.applyDocumentMeta();
+    }
 
     this.save();
 
@@ -101,11 +112,34 @@ class Config {
    * @param {string} setting - The setting name to check
    * @returns {boolean} Whether the setting can override storage
    */
+  /**
+   * Apply page title and favicon to the DOM document head
+   * @returns {void}
+   */
+  applyDocumentMeta() {
+    const pageTitle = this.title || this.defaults.title || "~/.config";
+    if (document.title !== pageTitle) {
+      document.title = pageTitle;
+    }
+
+    const faviconHref = this.favicon || this.defaults.favicon || "src/img/favicon.png";
+    let link = document.querySelector("link[rel*='icon']");
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "icon";
+      link.type = "image/png";
+      document.head.appendChild(link);
+    }
+    if (link.getAttribute("href") !== faviconHref) {
+      link.setAttribute("href", faviconHref);
+    }
+  }
+
   canOverrideStorage(setting) {
     if (localStorage.getItem("guiModified") === "true") {
       return false;
     }
-    return setting in this.config && (this.config.overrideStorage || setting === "tabs");
+    return setting in this.config && (this.config.overrideStorage || setting === "tabs" || setting === "title" || setting === "favicon");
   }
 
   /**

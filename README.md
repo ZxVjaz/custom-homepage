@@ -40,6 +40,9 @@ A Customisable homepage that uses the [**Catppuccin palettes**](https://catppucc
 - Automatic theme switching based on system settings (light/dark mode)
 - Built-in GUI settings modal with live bookmarks and tabs editor
 - Import & export configuration tools (JSON backup & sync)
+- Customizable page title and favicon (browser tab + statusbar icon)
+- Customizable animation playback speed for bookmarks and search (with 0x instant mode)
+- Visual banner picker with previews for all 18 preset animations and custom image URLs
 - Customisable startpage / bookmarks manager
 - Search bar with multiple engines and quick command triggers
 - Weather widget with location search combobox
@@ -48,9 +51,10 @@ A Customisable homepage that uses the [**Catppuccin palettes**](https://catppucc
 ## 🪵 Usage
 
 > [!TIP]
-> **Quick Configuration via GUI**:
-> You can configure everything directly in your browser without editing code! Open the search bar by pressing <kbd>s</kbd>, type `:settings`, and hit <kbd>Enter</kbd> to launch the visual settings modal. See [Settings & Customisation](#️-settings--customisation) below for details.
-> You can find icons for your bookmarks using [`tabler-icons`](https://tabler.io/icons).
+> **Configuration Options**:
+> - **Visual Settings Modal (GUI)**: Open the search bar by pressing <kbd>s</kbd>, type `:settings`, and hit <kbd>Enter</kbd> to launch the visual settings modal.
+> - **Code Configuration (`userconfig.js`)**: Prefer code-first configuration? Read the dedicated [**`userconfig.js` Configuration Guide**](docs/userconfig-guide.md) for full instructions and examples on customizing themes, page title, favicon, animation speed, search engines, and bookmark tabs.
+> - **Bookmark Icons**: You can find icons for your bookmarks using [`tabler-icons`](https://tabler.io/icons).
 
 1. Open https://zxvjaz.github.io/custom-homepage/
 2. Configure as you like and enjoy!
@@ -103,13 +107,13 @@ The startpage features a built-in visual configuration modal, allowing you to cu
 
 ### Configuration Sections
 
-- **General**: Select your preferred light and dark Catppuccin flavour (Latte, Frappé, Macchiato, Mocha), set a fastlink URL, and choose your default search engine.
+- **General**: Select your preferred light and dark Catppuccin flavour (Latte, Frappé, Macchiato, Mocha), set a custom Page Title and Favicon Image, adjust animation playback speed sliders for bookmarks and search (with 0x instant mode), set a fastlink URL, and choose your default search engine.
 - **Weather & Clock**: Toggle the weather and clock widgets on or off, search for your city from a built-in global and regional database with aliases, configure temperature units (°C / °F) and OpenWeatherMap API key, and customise clock formatting or multiple time zones.
-- **Bookmarks & Tabs**: Visually organise tabs, choose banner GIF animations from presets, manage categories, and add or edit links with live Tabler icon previews and Catppuccin palette colour pickers.
+- **Bookmarks & Tabs**: Visually organise tabs, choose banner GIF animations from the built-in preset picker gallery (1-18) or custom image URLs, manage categories, and add or edit links with live Tabler icon previews and Catppuccin palette colour pickers.
 - **Backup & Sync**: Export your configuration as a standalone `.json` backup file, import an existing JSON or `userconfig.js` file, or restore default settings with a single click.
 
 > [!NOTE]
-> Settings configured through the GUI take precedence and are stored in your browser's `localStorage`.
+> Settings configured through the GUI take precedence and are stored in your browser's `localStorage`. For a complete guide on manual configuration via code, check out [**`docs/userconfig-guide.md`**](docs/userconfig-guide.md).
 
 ## 🖼️ Available Banners
 

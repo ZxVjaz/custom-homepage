@@ -214,11 +214,12 @@ class Statusbar extends Component {
    * @returns {string} HTML template with tabs and widgets
    */
   template() {
+    const iconSrc = (typeof CONFIG !== "undefined" && CONFIG.favicon) ? CONFIG.favicon : "src/img/favicon.png";
     return `
         <div id="tabs">
             <cols>
                 <button class="+ fastlink">
-                  <img class="fastlink-icon" src="src/img/favicon.png"/>
+                  <img class="fastlink-icon" src="${iconSrc}"/>
                 </button>
                 <ul class="- indicator"></ul>
                 <div class="+ widgets col-end">
