@@ -42,7 +42,7 @@ A Customisable homepage that uses the [**Catppuccin palettes**](https://catppucc
 - Import & export configuration tools (JSON backup & sync)
 - Customizable page title and favicon (browser tab + statusbar icon)
 - Customizable animation playback speed for bookmarks and search (with 0x instant mode)
-- Visual banner picker with previews for all 18 preset animations and custom image URLs
+- Visual banner picker with previews for all 18 preset animations and custom image/GIF uploads (Base64)
 - Customisable startpage / bookmarks manager
 - Search bar with multiple engines and quick command triggers
 - Weather widget with location search combobox
@@ -109,7 +109,7 @@ The startpage features a built-in visual configuration modal, allowing you to cu
 
 - **General**: Select your preferred light and dark Catppuccin flavour (Latte, Frappé, Macchiato, Mocha), set a custom Page Title and Favicon Image, adjust animation playback speed sliders for bookmarks and search (with 0x instant mode), set a fastlink URL, and choose your default search engine.
 - **Weather & Clock**: Toggle the weather and clock widgets on or off, search for your city from a built-in global and regional database with aliases, configure temperature units (°C / °F) and OpenWeatherMap API key, and customise clock formatting or multiple time zones.
-- **Bookmarks & Tabs**: Visually organise tabs, choose banner GIF animations from the built-in preset picker gallery (1-18) or custom image URLs, manage categories, and add or edit links with live Tabler icon previews and Catppuccin palette colour pickers.
+- **Bookmarks & Tabs**: Visually organise tabs, choose banner GIF animations from the built-in preset picker gallery (1-18) or upload custom local images/GIFs stored as Base64 Data URLs, manage categories, and add or edit links with live Tabler icon previews and Catppuccin palette colour pickers.
 - **Backup & Sync**: Export your configuration as a standalone `.json` backup file, import an existing JSON or `userconfig.js` file, or restore default settings with a single click.
 
 > [!NOTE]

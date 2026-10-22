@@ -1085,6 +1085,22 @@ class Settings extends Component {
         flex-direction: column;
         gap: 14px;
         overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: ${p.surface1} ${p.mantle};
+      }
+      .sub-modal-body::-webkit-scrollbar {
+        width: 6px;
+      }
+      .sub-modal-body::-webkit-scrollbar-track {
+        background: ${p.mantle};
+        border-radius: 4px;
+      }
+      .sub-modal-body::-webkit-scrollbar-thumb {
+        background: ${p.surface1};
+        border-radius: 4px;
+      }
+      .sub-modal-body::-webkit-scrollbar-thumb:hover {
+        background: ${p.surface2};
       }
 
       .sub-modal-footer {
@@ -1153,13 +1169,42 @@ class Settings extends Component {
       }
 
       /* Banner Picker Modal & Grid */
+      .banner-picker-modal-body {
+        padding: 16px 20px 8px 20px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        gap: 12px !important;
+      }
+
       .banner-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-        max-height: 440px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-auto-rows: max-content;
+        gap: 16px;
+        flex: 1 1 0%;
+        min-height: 0;
         overflow-y: auto;
-        padding-right: 4px;
+        padding-right: 8px;
+        padding-bottom: 14px;
+        scrollbar-width: thin;
+        scrollbar-color: ${p.surface1} ${p.mantle};
+      }
+      .banner-grid::-webkit-scrollbar {
+        width: 6px;
+      }
+      .banner-grid::-webkit-scrollbar-track {
+        background: ${p.mantle};
+        border-radius: 4px;
+      }
+      .banner-grid::-webkit-scrollbar-thumb {
+        background: ${p.surface1};
+        border-radius: 4px;
+      }
+      .banner-grid::-webkit-scrollbar-thumb:hover {
+        background: ${p.surface2};
       }
       .banner-grid-item {
         background: ${p.surface0};
@@ -1167,33 +1212,224 @@ class Settings extends Component {
         border-radius: 8px;
         overflow: hidden;
         cursor: pointer;
-        transition: transform 0.14s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
         display: flex;
         flex-direction: column;
+        width: 100%;
+        aspect-ratio: 4 / 5;
+        box-sizing: border-box;
       }
       .banner-grid-item:hover {
-        transform: translateY(-2px);
+        transform: translateY(-3px);
         border-color: ${p.blue};
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
       }
       .banner-grid-item.selected {
         border-color: ${p.green};
-        box-shadow: 0 0 0 2px ${p.green}40;
+        box-shadow: 0 0 0 2px ${p.green}40, 0 6px 18px rgba(0, 0, 0, 0.4);
       }
       .banner-grid-preview {
         width: 100%;
-        height: 75px;
+        flex: 1 1 0%;
+        min-height: 0;
         object-fit: cover;
-        background: ${p.crust};
+        background: #1a1a24;
+        background-image: 
+          linear-gradient(45deg, #242436 25%, transparent 25%), 
+          linear-gradient(-45deg, #242436 25%, transparent 25%), 
+          linear-gradient(45deg, transparent 75%, #242436 75%), 
+          linear-gradient(-45deg, transparent 75%, #242436 75%);
+        background-size: 12px 12px;
+        background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
         display: block;
       }
       .banner-grid-label {
-        font-size: 11px;
+        flex-shrink: 0;
+        font-size: 11.5px;
         font-weight: 600;
+        letter-spacing: 0.3px;
         text-align: center;
-        padding: 5px 4px;
+        padding: 6px 4px;
         color: ${p.subtext1};
         background: ${p.mantle};
+        border-top: 1px solid ${p.surface0};
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* Banner Picker Header Card & Previews */
+      .banner-picker-header-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 14px;
+        background: ${p.surface0};
+        border: 1px solid ${p.surface1};
+        border-radius: 8px;
+        margin-bottom: 14px;
+      }
+      .banner-picker-header-info {
+        flex: 1;
+      }
+      .banner-picker-target-tab-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: ${p.text};
+      }
+      .banner-picker-preview-box {
+        width: 64px;
+        height: 80px; /* 4:5 aspect ratio */
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+      .tab-banner-preview-wrap {
+        width: 36px;
+        height: 45px; /* 4:5 aspect ratio */
+        border-radius: 4px;
+        border: 1px solid ${p.surface1};
+        background-color: #1a1a24;
+        background-image: 
+          linear-gradient(45deg, #242436 25%, transparent 25%), 
+          linear-gradient(-45deg, #242436 25%, transparent 25%), 
+          linear-gradient(45deg, transparent 75%, #242436 75%), 
+          linear-gradient(-45deg, transparent 75%, #242436 75%);
+        background-size: 8px 8px;
+        background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        flex-shrink: 0;
+        box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
+        cursor: pointer;
+        transition: border-color 0.15s ease, transform 0.1s ease;
+      }
+      .tab-banner-preview-wrap:hover {
+        border-color: ${p.blue};
+        transform: scale(1.04);
+      }
+      .tab-banner-preview-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      /* Animated GIF Option Cards */
+      .gif-option-card {
+        padding: 14px;
+        background: ${p.surface0};
+        border: 1px solid ${p.surface1};
+        border-radius: 8px;
+        cursor: pointer;
+        transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+      }
+      .gif-option-card:hover {
+        border-color: ${p.blue};
+        background: ${p.surface1}30;
+      }
+      .gif-option-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      /* Image Cropper Modal & Controls (Discord Style) */
+      .cropper-modal-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .cropper-container {
+        position: relative;
+        width: 280px;
+        height: 280px;
+        /* Checkerboard pattern for transparency */
+        background-color: #1a1a24;
+        background-image: 
+          linear-gradient(45deg, #242436 25%, transparent 25%), 
+          linear-gradient(-45deg, #242436 25%, transparent 25%), 
+          linear-gradient(45deg, transparent 75%, #242436 75%), 
+          linear-gradient(-45deg, transparent 75%, #242436 75%);
+        background-size: 16px 16px;
+        background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: grab;
+        user-select: none;
+        touch-action: none;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        transition: width 0.2s ease, height 0.2s ease;
+      }
+      .cropper-container.banner-mode {
+        width: 320px;
+        height: 380px;
+      }
+      .cropper-container:active {
+        cursor: grabbing;
+      }
+      .cropper-image {
+        position: absolute;
+        transform-origin: center center;
+        pointer-events: none;
+        will-change: transform;
+      }
+      .cropper-viewport-border {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 2px dashed rgba(255, 255, 255, 0.65);
+        pointer-events: none;
+        box-shadow: 0 0 0 9999px rgba(17, 17, 27, 0.75);
+      }
+      .cropper-viewport-border.circle-mode {
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+      }
+      .cropper-viewport-border.banner-mode {
+        width: 256px;
+        height: 320px;
+        border-radius: 6px;
+      }
+      .cropper-zoom-controls {
+        width: 100%;
+        margin-top: 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .favicon-preview-wrap {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 1px solid ${p.surface1};
+        /* Checkerboard for transparent favicon preview */
+        background-color: #1a1a24;
+        background-image: 
+          linear-gradient(45deg, #242436 25%, transparent 25%), 
+          linear-gradient(-45deg, #242436 25%, transparent 25%), 
+          linear-gradient(45deg, transparent 75%, #242436 75%), 
+          linear-gradient(-45deg, transparent 75%, #242436 75%);
+        background-size: 10px 10px;
+        background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+      .favicon-preview-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
 
       .engine-url {
@@ -1915,9 +2151,21 @@ class Settings extends Component {
                       <span class="form-hint">Homepage title displayed in the browser tab.</span>
                     </div>
                     <div class="form-group">
-                      <label class="form-label">Favicon Image URL</label>
-                      <input type="text" class="form-input" id="gen-favicon" placeholder="src/img/favicon.png">
-                      <span class="form-hint">Icon for browser tab and statusbar fastlink button.</span>
+                      <label class="form-label">Favicon Image</label>
+                      <div style="display: flex; align-items: center; gap: 12px; min-height: 38px;">
+                        <div class="favicon-preview-wrap" title="Favicon preview">
+                          <img id="gen-favicon-preview" class="favicon-preview-img" src="src/img/favicon.png" alt="Favicon">
+                        </div>
+                        <input type="hidden" id="gen-favicon" value="src/img/favicon.png">
+                        <input type="file" id="gen-favicon-file" accept="image/*" style="display: none;">
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-upload-favicon" title="Upload & crop local image">
+                          Update
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-reset-favicon" title="Reset favicon to default">
+                          Reset
+                        </button>
+                      </div>
+                      <span class="form-hint">Used for browser tab icon and statusbar fastlink button.</span>
                     </div>
                   </div>
                 </div>
@@ -2387,32 +2635,140 @@ class Settings extends Component {
           </div>
           <!-- Banner Picker Sub-Modal -->
           <div id="banner-picker-modal" class="sub-modal" style="z-index: 100003;">
-            <div class="sub-modal-dialog" style="width: 600px;">
-              <div class="sub-modal-header">
+            <div class="sub-modal-dialog" style="width: 720px; height: 86vh; max-height: 820px; display: flex; flex-direction: column;">
+              <div class="sub-modal-header" style="flex-shrink: 0;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <i class="ti ti-photo" style="font-size: 18px; color: ${p.peach};"></i>
                   <span class="sub-modal-title">Choose Tab Banner</span>
                 </div>
                 <button type="button" class="btn-close" id="btn-banner-picker-close"><i class="ti ti-x"></i></button>
               </div>
-              <div class="sub-modal-body" style="padding: 16px 20px;">
+              <div class="sub-modal-body banner-picker-modal-body">
                 <input type="hidden" id="banner-picker-target-tidx" value="">
-                <div class="form-group" style="margin-bottom: 14px;">
-                  <label class="form-label">Custom Image URL or Path</label>
-                  <div style="display: flex; gap: 8px;">
-                    <input type="text" class="form-input" id="banner-custom-url-input" placeholder="e.g. src/img/banners/banner_01.gif or https://example.com/banner.gif" style="flex: 1;">
-                    <button type="button" class="btn btn-secondary btn-sm" id="btn-apply-custom-banner">Apply URL</button>
+
+                <!-- Tab Banner Header Card with Current Preview & Actions -->
+                <div class="banner-picker-header-card" style="flex-shrink: 0;">
+                  <div class="tab-banner-preview-wrap banner-picker-preview-box" title="Current tab banner preview">
+                    <img id="banner-picker-current-preview" class="tab-banner-preview-img" src="src/img/banners/banner_01.gif" alt="Current Banner">
+                  </div>
+                  <div class="banner-picker-header-info">
+                    <div class="banner-picker-target-tab-title" id="banner-picker-tab-name">Editing Tab: 1</div>
+                    <div style="font-size: 12px; color: ${p.subtext0}; margin-top: 2px;">
+                      Upload a custom image/GIF (ideal 4:5 ratio) or select from preset banners below.
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                      <button type="button" class="btn btn-primary btn-sm" id="btn-banner-picker-upload">
+                        <i class="ti ti-upload"></i> Upload Banner
+                      </button>
+                      <button type="button" class="btn btn-secondary btn-sm" id="btn-banner-picker-reset" title="Reset banner to default from userconfig.js">
+                        <i class="ti ti-refresh"></i> Reset to Default
+                      </button>
+                      <input type="file" id="banner-picker-file-input" accept="image/*,.gif" style="display: none;">
+                    </div>
                   </div>
                 </div>
 
-                <div class="form-label" style="margin-bottom: 8px; font-weight: 600;">Or Select from Preset Banners (1 - 18)</div>
+                <div class="form-label" style="margin-bottom: 8px; font-weight: 600; flex-shrink: 0;">Select from Preset Banners (1 - 18)</div>
                 <div class="banner-grid" id="banner-presets-grid">
                   <!-- Populated dynamically -->
                 </div>
               </div>
-              <div class="sub-modal-footer">
+              <div class="sub-modal-footer" style="flex-shrink: 0;">
                 <button type="button" class="btn btn-secondary" id="btn-banner-picker-cancel">Cancel</button>
                 <button type="button" class="btn btn-primary" id="btn-banner-picker-select">Select Banner</button>
+              </div>
+            </div>
+          </div>
+          <!-- Image Cropper Sub-Modal (Discord Style) -->
+          <div id="image-cropper-modal" class="sub-modal" style="z-index: 100004;">
+            <div class="sub-modal-dialog" id="cropper-modal-dialog" style="width: 440px;">
+              <div class="sub-modal-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i class="ti ti-crop" id="cropper-modal-icon" style="font-size: 18px; color: ${p.blue};"></i>
+                  <span class="sub-modal-title" id="cropper-modal-title">Edit & Crop Image</span>
+                </div>
+                <button type="button" class="btn-close" id="btn-cropper-close"><i class="ti ti-x"></i></button>
+              </div>
+              <div class="cropper-modal-body">
+                <div class="cropper-container" id="cropper-container">
+                  <img id="cropper-img" class="cropper-image" alt="Cropping Source">
+                  <div class="cropper-viewport-border circle-mode" id="cropper-viewport-border"></div>
+                </div>
+
+                <div class="cropper-zoom-controls">
+                  <i class="ti ti-zoom-out" style="color: ${p.subtext0}; font-size: 16px;"></i>
+                  <input type="range" class="range-slider" id="cropper-zoom-slider" min="1" max="3" step="0.05" value="1">
+                  <i class="ti ti-zoom-in" style="color: ${p.subtext0}; font-size: 18px;"></i>
+                </div>
+                <span class="form-hint" style="margin-top: 8px; text-align: center;">
+                  Drag image to pan • Scroll or use slider to zoom
+                </span>
+              </div>
+              <div class="sub-modal-footer">
+                <button type="button" class="btn btn-secondary" id="btn-cropper-cancel">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btn-cropper-apply">Apply & Crop</button>
+              </div>
+            </div>
+          </div>
+          <!-- Animated GIF Options Sub-Modal -->
+          <div id="gif-action-modal" class="sub-modal" style="z-index: 100005;">
+            <div class="sub-modal-dialog" style="width: 460px;">
+              <div class="sub-modal-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i class="ti ti-movie" style="font-size: 18px; color: ${p.peach};"></i>
+                  <span class="sub-modal-title">Animated GIF Options</span>
+                </div>
+                <button type="button" class="btn-close" id="btn-gif-modal-close"><i class="ti ti-x"></i></button>
+              </div>
+              <div class="sub-modal-body" style="padding: 16px 20px;">
+                <div style="font-size: 13px; color: ${p.subtext0}; margin-bottom: 14px;">
+                  Choose how you would like to apply this animated GIF banner:
+                </div>
+
+                <!-- Option 1: Keep Animation -->
+                <div class="gif-option-card" id="btn-gif-keep-animation">
+                  <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <div class="gif-option-icon" style="background: ${p.green}20; color: ${p.green};">
+                      <i class="ti ti-player-play" style="font-size: 22px;"></i>
+                    </div>
+                    <div style="flex: 1;">
+                      <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-weight: 600; color: ${p.text}; font-size: 14px;">Keep Animation</span>
+                        <span class="badge" style="background: ${p.green}25; color: ${p.green}; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600;">Recommended</span>
+                      </div>
+                      <div style="font-size: 12px; color: ${p.subtext0}; margin-top: 4px; line-height: 1.4;">
+                        Saves the animated GIF directly. Preserves all frames, delays, and animation speed without flattening.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Option 2: Crop (In Development) -->
+                <div class="gif-option-card" style="margin-top: 10px;" id="card-gif-crop-info">
+                  <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <div class="gif-option-icon" style="background: ${p.peach}20; color: ${p.peach};">
+                      <i class="ti ti-crop" style="font-size: 22px;"></i>
+                    </div>
+                    <div style="flex: 1;">
+                      <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-weight: 600; color: ${p.text}; font-size: 14px;">Crop</span>
+                        <span class="badge" style="background: ${p.peach}25; color: ${p.peach}; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600;">In Development</span>
+                      </div>
+                      <div style="font-size: 12px; color: ${p.subtext0}; margin-top: 4px; line-height: 1.4;">
+                        Browser-based multi-frame GIF cropping is currently in development. To crop your animated GIF to the ideal 4:5 ratio beforehand, you can use an online editor.
+                      </div>
+                      <div style="margin-top: 8px;">
+                        <a href="https://ezgif.com/crop" target="_blank" rel="noopener noreferrer" class="link-external" style="font-size: 12px; color: ${p.blue}; display: inline-flex; align-items: center; gap: 4px;">
+                          <i class="ti ti-external-link"></i> Crop GIF at ezgif.com/crop (4:5 ratio)
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="sub-modal-footer">
+                <button type="button" class="btn btn-secondary" id="btn-gif-modal-cancel">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btn-gif-modal-apply">Use Animated GIF</button>
               </div>
             </div>
           </div>
@@ -2600,7 +2956,11 @@ class Settings extends Component {
     this.setDropdownValue('gen-theme-light', this.draftLight);
     this.setDropdownValue('gen-theme-dark', this.draftDark);
     shadow.querySelector('#gen-title').value = this.draftConfig.title || '~/.config';
-    shadow.querySelector('#gen-favicon').value = this.draftConfig.favicon || 'src/img/favicon.png';
+    const currentFav = this.draftConfig.favicon || 'src/img/favicon.png';
+    const favInput = shadow.querySelector('#gen-favicon');
+    const favPreview = shadow.querySelector('#gen-favicon-preview');
+    if (favInput) favInput.value = currentFav;
+    if (favPreview) favPreview.src = currentFav;
 
     const cfgSpeed = this.draftConfig.animationSpeed;
     let bSpeed = 1.0;
@@ -2845,8 +3205,17 @@ class Settings extends Component {
     if (!modal) return;
 
     shadow.querySelector('#banner-picker-target-tidx').value = tIdx;
+    const tabName = this.draftConfig.tabs[tIdx]?.name || `Tab ${tIdx + 1}`;
+    const tabNameEl = shadow.querySelector('#banner-picker-tab-name');
+    if (tabNameEl) tabNameEl.textContent = `Editing Tab: "${tabName}"`;
+
     const currentBanner = (this.draftConfig.tabs[tIdx]?.background_url || '').trim();
-    shadow.querySelector('#banner-custom-url-input').value = currentBanner;
+    this._selectedBannerUrl = currentBanner;
+
+    const previewEl = shadow.querySelector('#banner-picker-current-preview');
+    if (previewEl) {
+      previewEl.src = currentBanner || 'src/img/banners/banner_01.gif';
+    }
 
     // Render 18 preset banners
     const grid = shadow.querySelector('#banner-presets-grid');
@@ -2871,7 +3240,9 @@ class Settings extends Component {
       item.onclick = () => {
         grid.querySelectorAll('.banner-grid-item').forEach(it => it.classList.remove('selected'));
         item.classList.add('selected');
-        shadow.querySelector('#banner-custom-url-input').value = item.dataset.banner;
+        const chosen = item.dataset.banner;
+        this._selectedBannerUrl = chosen;
+        if (previewEl) previewEl.src = chosen;
       };
     });
 
@@ -2886,6 +3257,229 @@ class Settings extends Component {
     setTimeout(() => {
       modal.classList.remove('active', 'closing');
     }, 180);
+  }
+
+  getDefaultTabBanner(tIdx) {
+    const userconfigBanner = CONFIG?.config?.tabs?.[tIdx]?.background_url;
+    if (userconfigBanner) return userconfigBanner;
+    const presetNum = String((tIdx % 18) + 1).padStart(2, '0');
+    return `src/img/banners/banner_${presetNum}.gif`;
+  }
+
+  openGifModal() {
+    const modal = this.shadow.querySelector('#gif-action-modal');
+    if (!modal) return;
+    modal.classList.remove('closing');
+    modal.classList.add('active');
+  }
+
+  closeGifModal() {
+    const modal = this.shadow.querySelector('#gif-action-modal');
+    if (!modal || !modal.classList.contains('active')) return;
+    modal.classList.add('closing');
+    setTimeout(() => {
+      modal.classList.remove('active', 'closing');
+    }, 180);
+  }
+
+  // --- Discord-Style Image Cropper State & Methods ---
+  cropperState = {
+    mode: 'circle', // 'circle' | 'banner'
+    isDragging: false,
+    startX: 0,
+    startY: 0,
+    currentX: 0,
+    currentY: 0,
+    zoomLevel: 1,
+    baseWidth: 0,
+    baseHeight: 0,
+    containerWidth: 280,
+    containerHeight: 280,
+    viewportWidth: 220,
+    viewportHeight: 220,
+    viewportX: 30,
+    viewportY: 30,
+    outputWidth: 128,
+    outputHeight: 128,
+    onApply: null,
+  };
+
+  openImageCropper(imageSrc, onApply, options = {}) {
+    const shadow = this.shadow;
+    const modal = shadow.querySelector('#image-cropper-modal');
+    const img = shadow.querySelector('#cropper-img');
+    const slider = shadow.querySelector('#cropper-zoom-slider');
+    const container = shadow.querySelector('#cropper-container');
+    const border = shadow.querySelector('#cropper-viewport-border');
+    const modalTitle = shadow.querySelector('#cropper-modal-title');
+    const modalIcon = shadow.querySelector('#cropper-modal-icon');
+    if (!modal || !img || !slider) return;
+
+    const mode = options.mode || 'circle';
+    this.cropperState.mode = mode;
+    this.cropperState.onApply = onApply;
+
+    if (mode === 'banner') {
+      this.cropperState.containerWidth = 320;
+      this.cropperState.containerHeight = 380;
+      this.cropperState.viewportWidth = 256;
+      this.cropperState.viewportHeight = 320; // 4:5 portrait ratio (matches tab banner)
+      this.cropperState.viewportX = (320 - 256) / 2; // 32
+      this.cropperState.viewportY = (380 - 320) / 2; // 30
+      this.cropperState.outputWidth = 400;
+      this.cropperState.outputHeight = 500;
+
+      if (container) container.classList.add('banner-mode');
+      if (border) {
+        border.classList.remove('circle-mode');
+        border.classList.add('banner-mode');
+      }
+      if (modalTitle) modalTitle.textContent = 'Edit & Crop Banner (4:5 Ratio)';
+      if (modalIcon) modalIcon.className = 'ti ti-photo';
+    } else {
+      this.cropperState.containerWidth = 280;
+      this.cropperState.containerHeight = 280;
+      this.cropperState.viewportWidth = 220;
+      this.cropperState.viewportHeight = 220; // 1:1 circle ratio
+      this.cropperState.viewportX = 30;
+      this.cropperState.viewportY = 30;
+      this.cropperState.outputWidth = 128;
+      this.cropperState.outputHeight = 128;
+
+      if (container) container.classList.remove('banner-mode');
+      if (border) {
+        border.classList.remove('banner-mode');
+        border.classList.add('circle-mode');
+      }
+      if (modalTitle) modalTitle.textContent = 'Edit & Crop Favicon';
+      if (modalIcon) modalIcon.className = 'ti ti-crop';
+    }
+
+    img.src = imageSrc;
+    img.onload = () => {
+      const naturalWidth = img.naturalWidth;
+      const naturalHeight = img.naturalHeight;
+      const naturalRatio = naturalWidth / naturalHeight;
+      const viewportRatio = this.cropperState.viewportWidth / this.cropperState.viewportHeight;
+
+      if (naturalRatio > viewportRatio) {
+        this.cropperState.baseHeight = this.cropperState.viewportHeight;
+        this.cropperState.baseWidth = naturalWidth * (this.cropperState.viewportHeight / naturalHeight);
+      } else {
+        this.cropperState.baseWidth = this.cropperState.viewportWidth;
+        this.cropperState.baseHeight = naturalHeight * (this.cropperState.viewportWidth / naturalWidth);
+      }
+
+      this.cropperState.zoomLevel = 1;
+      slider.value = 1;
+
+      // Center initial image within container
+      this.cropperState.currentX = (this.cropperState.containerWidth - this.cropperState.baseWidth) / 2;
+      this.cropperState.currentY = (this.cropperState.containerHeight - this.cropperState.baseHeight) / 2;
+
+      this.updateCropperTransform();
+      modal.classList.remove('closing');
+      modal.classList.add('active');
+    };
+  }
+
+  closeImageCropper() {
+    const modal = this.shadow.querySelector('#image-cropper-modal');
+    if (!modal || !modal.classList.contains('active')) return;
+    modal.classList.add('closing');
+    setTimeout(() => {
+      modal.classList.remove('active', 'closing');
+    }, 180);
+  }
+
+  clampCropperPosition() {
+    const s = this.cropperState;
+    const w = s.baseWidth * s.zoomLevel;
+    const h = s.baseHeight * s.zoomLevel;
+
+    const vpX = s.viewportX;
+    const vpY = s.viewportY;
+    const minX = (vpX + s.viewportWidth) - w;
+    const maxX = vpX;
+    const minY = (vpY + s.viewportHeight) - h;
+    const maxY = vpY;
+
+    if (minX <= maxX) {
+      s.currentX = Math.min(maxX, Math.max(minX, s.currentX));
+    } else {
+      s.currentX = (s.containerWidth - w) / 2;
+    }
+
+    if (minY <= maxY) {
+      s.currentY = Math.min(maxY, Math.max(minY, s.currentY));
+    } else {
+      s.currentY = (s.containerHeight - h) / 2;
+    }
+  }
+
+  updateCropperTransform() {
+    this.clampCropperPosition();
+    const shadow = this.shadow;
+    const img = shadow.querySelector('#cropper-img');
+    if (!img) return;
+
+    const s = this.cropperState;
+    const w = s.baseWidth * s.zoomLevel;
+    const h = s.baseHeight * s.zoomLevel;
+
+    img.style.width = `${w}px`;
+    img.style.height = `${h}px`;
+    img.style.left = `${s.currentX}px`;
+    img.style.top = `${s.currentY}px`;
+  }
+
+  exportCroppedImage() {
+    const shadow = this.shadow;
+    const img = shadow.querySelector('#cropper-img');
+    if (!img) return null;
+
+    const s = this.cropperState;
+    const canvas = document.createElement('canvas');
+    canvas.width = s.outputWidth;
+    canvas.height = s.outputHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    if (s.mode === 'circle') {
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.clip();
+    }
+
+    const relX = s.viewportX - s.currentX;
+    const relY = s.viewportY - s.currentY;
+
+    const scaleToCanvas = s.outputWidth / s.viewportWidth;
+    const destW = (s.baseWidth * s.zoomLevel) * scaleToCanvas;
+    const destH = (s.baseHeight * s.zoomLevel) * scaleToCanvas;
+    const destX = -relX * scaleToCanvas;
+    const destY = -relY * scaleToCanvas;
+
+    ctx.drawImage(img, destX, destY, destW, destH);
+    ctx.restore();
+
+    if (s.mode === 'circle') {
+      return canvas.toDataURL('image/png');
+    }
+
+    try {
+      const webp = canvas.toDataURL('image/webp', 0.85);
+      if (webp && webp.startsWith('data:image/webp')) return webp;
+    } catch (e) {}
+    return canvas.toDataURL('image/jpeg', 0.85);
+  }
+
+  exportCroppedAvatar() {
+    return this.exportCroppedImage();
   }
 
   renderConfigureEnginesList() {
@@ -3096,11 +3690,16 @@ class Settings extends Component {
       <div class="tree-tab-card" data-tidx="${tIdx}">
         <div class="tree-tab-header">
           <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+            <div class="tab-banner-preview-wrap btn-open-banner-picker" data-tidx="${tIdx}" title="Click to choose or upload tab banner">
+              <img class="tab-banner-preview-img" src="${escapeHtml(tab.background_url || 'src/img/banners/banner_01.gif')}" alt="Banner">
+            </div>
             <i class="ti ti-folder" style="font-size: 18px; color: ${CONFIG.palette.peach};"></i>
-            <input type="text" class="form-input tab-name-input" data-tidx="${tIdx}" value="${escapeHtml(tab.name || '')}" placeholder="Tab Name (e.g. myself)" style="width: 150px;">
-            <input type="text" class="form-input tab-bg-input" data-tidx="${tIdx}" value="${escapeHtml(tab.background_url || '')}" placeholder="Banner URL (e.g. src/img/banners/banner_01.gif)" style="flex: 1;">
-            <button type="button" class="btn btn-secondary btn-sm btn-open-banner-picker" data-tidx="${tIdx}" title="Choose Banner from Presets">
+            <input type="text" class="form-input tab-name-input" data-tidx="${tIdx}" value="${escapeHtml(tab.name || '')}" placeholder="Tab Name (e.g. myself)" style="flex: 1; max-width: 240px;">
+            <button type="button" class="btn btn-secondary btn-sm btn-open-banner-picker" data-tidx="${tIdx}" title="Choose banner from presets or upload">
               <i class="ti ti-photo"></i> Choose Banner
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm btn-reset-tab-banner" data-tidx="${tIdx}" title="Reset banner to default preset">
+              <i class="ti ti-refresh"></i> Reset
             </button>
           </div>
           <button class="btn btn-danger btn-sm btn-del-tab" data-tidx="${tIdx}">
@@ -3205,20 +3804,29 @@ class Settings extends Component {
     const container = this.shadow.querySelector('#bookmarks-tree-container');
     const tabs = this.draftConfig.tabs;
 
-    // Tab Name & Banner inputs
+    // Tab Name inputs
     container.querySelectorAll('.tab-name-input').forEach(el => {
       el.oninput = (e) => { tabs[e.target.dataset.tidx].name = e.target.value; };
     });
-    container.querySelectorAll('.tab-bg-input').forEach(el => {
-      el.oninput = (e) => { tabs[e.target.dataset.tidx].background_url = e.target.value; };
-    });
 
-    // Open Banner Picker Modal
+    // Open Banner Picker Modal (both from button and thumbnail click)
     container.querySelectorAll('.btn-open-banner-picker').forEach(el => {
       el.onclick = (e) => {
         const btn = e.target.closest('.btn-open-banner-picker');
         const tIdx = parseInt(btn.dataset.tidx);
         this.openBannerPicker(tIdx);
+      };
+    });
+
+    // Reset Tab Banner to default from userconfig.js
+    container.querySelectorAll('.btn-reset-tab-banner').forEach(el => {
+      el.onclick = (e) => {
+        const btn = e.target.closest('.btn-reset-tab-banner');
+        const tIdx = parseInt(btn.dataset.tidx);
+        const defaultBanner = this.getDefaultTabBanner(tIdx);
+        tabs[tIdx].background_url = defaultBanner;
+        this.renderBookmarksTree();
+        this.showToast(`Reset tab "${tabs[tIdx].name || tIdx + 1}" banner to default (${defaultBanner.split('/').pop()})`, 'info');
       };
     });
 
@@ -3396,16 +4004,24 @@ class Settings extends Component {
   saveAndReload() {
     const configToSave = this.collectCurrentDraft();
 
-    // Persist to localStorage with GUI priority flag
-    localStorage.setItem('guiModified', 'true');
-    localStorage.setItem('preferredLightTheme', this.draftLight);
-    localStorage.setItem('preferredDarkTheme', this.draftDark);
-    localStorage.setItem('configuration', JSON.stringify(configToSave));
+    try {
+      // Persist to localStorage with GUI priority flag
+      localStorage.setItem('guiModified', 'true');
+      localStorage.setItem('preferredLightTheme', this.draftLight);
+      localStorage.setItem('preferredDarkTheme', this.draftDark);
+      localStorage.setItem('configuration', JSON.stringify(configToSave));
 
-    this.showToast('Saving settings and reloading...', 'info');
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
+      this.showToast('Saving settings and reloading...', 'info');
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } catch (e) {
+      if (e.name === 'QuotaExceededError' || e.code === 22) {
+        this.showToast('Storage quota exceeded! Custom images are too large for browser storage. Please use preset banners or smaller image files.', 'error');
+      } else {
+        this.showToast('Failed to save settings: ' + (e.message || e), 'error');
+      }
+    }
   }
 
   exportJson() {
@@ -3787,7 +4403,7 @@ class Settings extends Component {
 
     const applySelectedBanner = () => {
       const tIdx = parseInt(shadow.querySelector('#banner-picker-target-tidx').value);
-      const chosenUrl = (shadow.querySelector('#banner-custom-url-input').value || '').trim();
+      const chosenUrl = (this._selectedBannerUrl || '').trim();
       if (!isNaN(tIdx) && this.draftConfig.tabs[tIdx]) {
         this.draftConfig.tabs[tIdx].background_url = chosenUrl;
         this.renderBookmarksTree();
@@ -3799,8 +4415,249 @@ class Settings extends Component {
     const btnBannerSelect = shadow.querySelector('#btn-banner-picker-select');
     if (btnBannerSelect) btnBannerSelect.onclick = applySelectedBanner;
 
-    const btnApplyCustomBanner = shadow.querySelector('#btn-apply-custom-banner');
-    if (btnApplyCustomBanner) btnApplyCustomBanner.onclick = applySelectedBanner;
+    // Banner Picker Upload & Reset Actions
+    const btnBannerUpload = shadow.querySelector('#btn-banner-picker-upload');
+    const bannerFileInput = shadow.querySelector('#banner-picker-file-input');
+    if (btnBannerUpload && bannerFileInput) {
+      btnBannerUpload.onclick = () => bannerFileInput.click();
+      bannerFileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const tIdx = parseInt(shadow.querySelector('#banner-picker-target-tidx').value);
+        if (isNaN(tIdx) || !this.draftConfig.tabs[tIdx]) return;
+
+        if (file.type === 'image/gif') {
+          this._pendingBannerGif = file;
+          this.openGifModal();
+        } else {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            this.openImageCropper(event.target.result, (croppedDataUrl) => {
+              this._selectedBannerUrl = croppedDataUrl;
+              this.draftConfig.tabs[tIdx].background_url = croppedDataUrl;
+              const previewEl = shadow.querySelector('#banner-picker-current-preview');
+              if (previewEl) previewEl.src = croppedDataUrl;
+              this.renderBookmarksTree();
+              this.closeBannerPicker();
+              this.showToast('Custom banner cropped & applied! Click Save to persist.', 'success');
+            }, { mode: 'banner' });
+          };
+          reader.readAsDataURL(file);
+        }
+        bannerFileInput.value = '';
+      };
+    }
+
+    const btnBannerReset = shadow.querySelector('#btn-banner-picker-reset');
+    if (btnBannerReset) {
+      btnBannerReset.onclick = () => {
+        const tIdx = parseInt(shadow.querySelector('#banner-picker-target-tidx').value);
+        if (!isNaN(tIdx) && this.draftConfig.tabs[tIdx]) {
+          const defaultBanner = this.getDefaultTabBanner(tIdx);
+          this._selectedBannerUrl = defaultBanner;
+          this.draftConfig.tabs[tIdx].background_url = defaultBanner;
+          const previewEl = shadow.querySelector('#banner-picker-current-preview');
+          if (previewEl) previewEl.src = defaultBanner;
+
+          const grid = shadow.querySelector('#banner-presets-grid');
+          if (grid) {
+            grid.querySelectorAll('.banner-grid-item').forEach(it => {
+              it.classList.toggle('selected', it.dataset.banner === defaultBanner);
+            });
+          }
+          this.renderBookmarksTree();
+          this.showToast(`Reset banner to default (${defaultBanner.split('/').pop()})`, 'info');
+        }
+      };
+    }
+
+    // Animated GIF Modal Events
+    const btnGifClose = shadow.querySelector('#btn-gif-modal-close');
+    if (btnGifClose) btnGifClose.onclick = () => this.closeGifModal();
+
+    const btnGifCancel = shadow.querySelector('#btn-gif-modal-cancel');
+    if (btnGifCancel) btnGifCancel.onclick = () => this.closeGifModal();
+
+    const gifModal = shadow.querySelector('#gif-action-modal');
+    if (gifModal) {
+      gifModal.onclick = (e) => {
+        if (e.target === gifModal) this.closeGifModal();
+      };
+    }
+
+    const applyAnimatedGif = () => {
+      const file = this._pendingBannerGif;
+      if (!file) return;
+
+      if (file.size > 2 * 1024 * 1024) {
+        const mb = (file.size / (1024 * 1024)).toFixed(1);
+        this.showToast(`Warning: GIF size is ${mb} MB. Files over 2 MB may exceed browser storage quota.`, 'warning');
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const tIdx = parseInt(shadow.querySelector('#banner-picker-target-tidx').value);
+        if (!isNaN(tIdx) && this.draftConfig.tabs[tIdx]) {
+          this._selectedBannerUrl = event.target.result;
+          this.draftConfig.tabs[tIdx].background_url = event.target.result;
+          const previewEl = shadow.querySelector('#banner-picker-current-preview');
+          if (previewEl) previewEl.src = event.target.result;
+          this.renderBookmarksTree();
+          this.closeGifModal();
+          this.closeBannerPicker();
+          this.showToast('Animated GIF banner applied! Click Save to persist.', 'success');
+        }
+      };
+      reader.readAsDataURL(file);
+    };
+
+    const btnGifKeep = shadow.querySelector('#btn-gif-keep-animation');
+    if (btnGifKeep) btnGifKeep.onclick = applyAnimatedGif;
+
+    const btnGifApply = shadow.querySelector('#btn-gif-modal-apply');
+    if (btnGifApply) btnGifApply.onclick = applyAnimatedGif;
+
+    // --- Favicon Upload & Image Cropper Events ---
+    const btnUploadFavicon = shadow.querySelector('#btn-upload-favicon');
+    const faviconFileInput = shadow.querySelector('#gen-favicon-file');
+    if (btnUploadFavicon && faviconFileInput) {
+      btnUploadFavicon.onclick = () => faviconFileInput.click();
+      faviconFileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          this.openImageCropper(event.target.result, (croppedDataUrl) => {
+            const favInput = shadow.querySelector('#gen-favicon');
+            const favPreview = shadow.querySelector('#gen-favicon-preview');
+            if (favInput) favInput.value = croppedDataUrl;
+            if (favPreview) favPreview.src = croppedDataUrl;
+            this.draftConfig.favicon = croppedDataUrl;
+            this.showToast('Custom favicon cropped & ready! Click Save to apply.', 'info');
+          });
+        };
+        reader.readAsDataURL(file);
+        faviconFileInput.value = '';
+      };
+    }
+
+    const btnResetFavicon = shadow.querySelector('#btn-reset-favicon');
+    if (btnResetFavicon) {
+      btnResetFavicon.onclick = () => {
+        const defaultFav = 'src/img/favicon.png';
+        const favInput = shadow.querySelector('#gen-favicon');
+        const favPreview = shadow.querySelector('#gen-favicon-preview');
+        if (favInput) favInput.value = defaultFav;
+        if (favPreview) favPreview.src = defaultFav;
+        this.draftConfig.favicon = defaultFav;
+        this.showToast('Favicon reset to default. Click Save to apply.', 'info');
+      };
+    }
+
+    // Cropper modal buttons
+    const btnCropperClose = shadow.querySelector('#btn-cropper-close');
+    if (btnCropperClose) btnCropperClose.onclick = () => this.closeImageCropper();
+
+    const btnCropperCancel = shadow.querySelector('#btn-cropper-cancel');
+    if (btnCropperCancel) btnCropperCancel.onclick = () => this.closeImageCropper();
+
+    const cropperModal = shadow.querySelector('#image-cropper-modal');
+    if (cropperModal) {
+      cropperModal.onclick = (e) => {
+        if (e.target === cropperModal) this.closeImageCropper();
+      };
+    }
+
+    const btnCropperApply = shadow.querySelector('#btn-cropper-apply');
+    if (btnCropperApply) {
+      btnCropperApply.onclick = () => {
+        const dataUrl = this.exportCroppedAvatar();
+        if (dataUrl && typeof this.cropperState.onApply === 'function') {
+          this.cropperState.onApply(dataUrl);
+        }
+        this.closeImageCropper();
+      };
+    }
+
+    // Cropper Mouse Drag / Pan Events
+    const cropperContainer = shadow.querySelector('#cropper-container');
+    if (cropperContainer) {
+      cropperContainer.onmousedown = (e) => {
+        this.cropperState.isDragging = true;
+        this.cropperState.startX = e.clientX - this.cropperState.currentX;
+        this.cropperState.startY = e.clientY - this.cropperState.currentY;
+      };
+
+      window.addEventListener('mousemove', (e) => {
+        if (!this.cropperState.isDragging) return;
+        this.cropperState.currentX = e.clientX - this.cropperState.startX;
+        this.cropperState.currentY = e.clientY - this.cropperState.startY;
+        this.updateCropperTransform();
+      });
+
+      window.addEventListener('mouseup', () => {
+        this.cropperState.isDragging = false;
+      });
+
+      // Cropper Touch Events
+      cropperContainer.ontouchstart = (e) => {
+        if (e.touches.length === 1) {
+          this.cropperState.isDragging = true;
+          this.cropperState.startX = e.touches[0].clientX - this.cropperState.currentX;
+          this.cropperState.startY = e.touches[0].clientY - this.cropperState.currentY;
+        }
+      };
+
+      window.addEventListener('touchmove', (e) => {
+        if (!this.cropperState.isDragging || e.touches.length !== 1) return;
+        this.cropperState.currentX = e.touches[0].clientX - this.cropperState.startX;
+        this.cropperState.currentY = e.touches[0].clientY - this.cropperState.startY;
+        this.updateCropperTransform();
+      });
+
+      window.addEventListener('touchend', () => {
+        this.cropperState.isDragging = false;
+      });
+
+      // Cropper Mouse Wheel Zoom
+      cropperContainer.onwheel = (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.08 : -0.08;
+        const slider = shadow.querySelector('#cropper-zoom-slider');
+        const oldZoom = this.cropperState.zoomLevel;
+        let newZoom = Math.min(3, Math.max(1, oldZoom + delta));
+        if (newZoom !== oldZoom) {
+          this.cropperState.zoomLevel = newZoom;
+          if (slider) slider.value = newZoom;
+
+          const centerX = (this.cropperState.containerWidth || 280) / 2;
+          const centerY = (this.cropperState.containerHeight || 280) / 2;
+          this.cropperState.currentX = centerX - (centerX - this.cropperState.currentX) * (newZoom / oldZoom);
+          this.cropperState.currentY = centerY - (centerY - this.cropperState.currentY) * (newZoom / oldZoom);
+
+          this.updateCropperTransform();
+        }
+      };
+    }
+
+    // Cropper Zoom Slider
+    const cropperZoomSlider = shadow.querySelector('#cropper-zoom-slider');
+    if (cropperZoomSlider) {
+      cropperZoomSlider.oninput = (e) => {
+        const oldZoom = this.cropperState.zoomLevel;
+        const newZoom = parseFloat(e.target.value);
+        this.cropperState.zoomLevel = newZoom;
+
+        const centerX = (this.cropperState.containerWidth || 280) / 2;
+        const centerY = (this.cropperState.containerHeight || 280) / 2;
+        this.cropperState.currentX = centerX - (centerX - this.cropperState.currentX) * (newZoom / oldZoom);
+        this.cropperState.currentY = centerY - (centerY - this.cropperState.currentY) * (newZoom / oldZoom);
+
+        this.updateCropperTransform();
+      };
+    }
 
     // Default search dropdown change listener on front page
     const defaultSearchInput = shadow.querySelector('#gen-search-default');

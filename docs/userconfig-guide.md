@@ -88,7 +88,7 @@ Sets the browser tab title displayed for your homepage.
 ### Favicon Image (`favicon`)
 Sets the website favicon (the icon shown on your browser tab) and the statusbar fastlink button icon.
 
-- **Type**: `String` (relative path or external URL)
+- **Type**: `String` (relative path, external URL, or Base64 Data URL)
 - **Default**: `"src/img/favicon.png"`
 - **Examples**:
   ```javascript
@@ -98,6 +98,10 @@ Sets the website favicon (the icon shown on your browser tab) and the statusbar 
   // Custom remote PNG or SVG
   favicon: "https://raw.githubusercontent.com/catppuccin/catppuccin/main/assets/logos/exports/1544x1544_circle.png",
   ```
+
+> [!TIP]
+> **Built-in Upload & Cropper**:
+> You can also upload any local image file (including transparent PNGs/SVGs) directly inside the Settings GUI (<kbd>s</kbd> -> `:settings` -> *General*). The Discord-style interactive cropper allows you to pan, zoom, preview transparency on a checkerboard, and save the cropped icon directly into browser `localStorage`.
 
 ### Animation Speed (`animationSpeed`)
 Adjusts the playback speed of transitions. Supports independent multipliers for bookmark clicks and search interactions, or a single global number.
@@ -267,7 +271,7 @@ tabs: [
 ```
 
 ### Banner Picker Reference
-Each tab has a `background_url` displaying an animated GIF or image above the bookmarks. You can use any of the 18 built-in preset banners, or provide a URL / local file path:
+Each tab has a `background_url` displaying an animated GIF or image to the left of the bookmarks. Banners support the 18 built-in preset banners or custom local uploads stored as Base64 Data URLs (external image URLs are not supported):
 
 | Preset Name | Relative Path |
 | :--- | :--- |
@@ -291,7 +295,19 @@ Each tab has a `background_url` displaying an animated GIF or image above the bo
 | `banner_18` | `src/img/banners/banner_18.gif` |
 
 > [!TIP]
-> You can also browse and select these visually using the **Choose Banner** button in the Settings Modal GUI (`:settings` -> *Bookmarks Editor*).
+> You can browse and select presets or upload custom banners visually using the **Choose Banner** button or tab thumbnail in the Settings Modal GUI (`:settings` -> *Bookmarks & Tabs*).
+
+#### Custom Banner Uploads & Aspect Ratio
+> [!IMPORTANT]
+> **Base64 Storage Only**: External image URLs (`https://...`) are not supported for banners. All custom banners must be uploaded directly via the GUI and stored in your configuration as Base64 Data URLs, or selected from the built-in preset paths.
+
+- **Native Aspect Ratio**: Tab banners occupy a `360px × 450px` area on the left of each panel. This corresponds to a **`4:5` portrait aspect ratio (`0.80`)**. Recommended resolutions range from `400×500` to `520×650`.
+- **Interactive Cropper**: Uploading static images (PNG, JPG, WebP) opens the built-in Discord-style aspect-ratio cropper. You can pan, zoom with the slider or mouse wheel, and boundary clamping prevents empty borders. Exported images are saved as optimized WebP/JPEG Base64 data URLs (~40–90 KB).
+- **Animated GIF Uploads**: Uploading a `.gif` file opens the Animated GIF dialog:
+  - **Keep Animation**: Saves the animated GIF directly into your configuration as a raw Base64 Data URL without canvas flattening, preserving all frames, delay timings, and motion.
+  - **Crop**: Native multi-frame GIF cropping is currently in development. To crop an animated GIF without losing animation, pre-crop it to a 4:5 ratio using a free online tool like [ezgif.com/crop](https://ezgif.com/crop) before uploading.
+- **Storage Limits**: Browsers allocate a ~5 MB `localStorage` quota per domain. Because all custom banners are stored directly as Base64 Data URLs, keep uploaded images and GIFs under 2 MB to prevent storage overflow.
+- **Reset to Default**: Clicking **Reset** on any tab card or inside the Banner Picker restores that tab's banner to its original default defined in `userconfig.js` (e.g. `banner_03.gif`, `banner_08.gif`, `banner_16.gif`).
 
 ### Categories & Links
 Each link entry accepts:
