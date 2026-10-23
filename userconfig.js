@@ -53,14 +53,20 @@ const default_configuration = {
   localFonts: true,
   fastlink: "https://www.google.com",
   openLastVisitedTab: false,
-  tabs: [
+tabs: [
     {
-      name: "work",
+      name: "daily",
       background_url: "src/img/banners/banner_03.gif",
       categories: [
         {
-          name: "productivity",
+          name: "communication",
           links: [
+            {
+              name: "whatsapp",
+              url: "https://web.whatsapp.com",
+              icon: "brand-whatsapp",
+              icon_color: palette.green,
+            },
             {
               name: "gmail",
               url: "https://mail.google.com",
@@ -73,10 +79,15 @@ const default_configuration = {
               icon: "calendar-event",
               icon_color: palette.blue,
             },
+          ],
+        },
+        {
+          name: "personal tracking & notes",
+          links: [
             {
-              name: "notion",
-              url: "https://www.notion.so",
-              icon: "brand-notion",
+              name: "keep",
+              url: "https://keep.google.com",
+              icon: "note",
               icon_color: palette.peach,
             },
             {
@@ -85,74 +96,56 @@ const default_configuration = {
               icon: "brand-google-drive",
               icon_color: palette.green,
             },
-          ],
-        },
-        {
-          name: "collaboration",
-          links: [
             {
-              name: "slack",
-              url: "https://slack.com",
-              icon: "brand-slack",
-              icon_color: palette.mauve,
-            },
-            {
-              name: "trello",
-              url: "https://trello.com",
-              icon: "brand-trello",
-              icon_color: palette.blue,
-            },
-            {
-              name: "figma",
-              url: "https://www.figma.com",
-              icon: "brand-figma",
-              icon_color: palette.peach,
-            },
-            {
-              name: "meet",
-              url: "https://meet.google.com",
-              icon: "video",
-              icon_color: palette.green,
+              name: "maps",
+              url: "https://maps.google.com",
+              icon: "map-pin",
+              icon_color: palette.red,
             },
           ],
         },
         {
-          name: "finance & docs",
+          name: "daily info & utilities",
           links: [
             {
-              name: "sheets",
-              url: "https://docs.google.com/spreadsheets",
-              icon: "table",
-              icon_color: palette.green,
-            },
-            {
-              name: "docs",
-              url: "https://docs.google.com/document",
-              icon: "file-text",
-              icon_color: palette.blue,
-            },
-            {
-              name: "keep",
-              url: "https://keep.google.com",
-              icon: "note",
+              name: "claude",
+              url: "https://claude.ai",
+              icon: "message-chatbot",
               icon_color: palette.peach,
             },
             {
-              name: "canva",
-              url: "https://www.canva.com",
-              icon: "palette",
-              icon_color: palette.mauve,
+              name: "gemini",
+              url: "https://gemini.google.com",
+              icon: "sparkles",
+              icon_color: palette.blue,
             },
           ],
         },
       ],
     },
     {
-      name: "dev",
+      name: "work",
       background_url: "src/img/banners/banner_08.gif",
       categories: [
         {
-          name: "code & repo",
+          name: "team collaboration",
+          links: [
+            {
+              name: "meet",
+              url: "https://meet.google.com",
+              icon: "video",
+              icon_color: palette.green,
+            },
+            {
+              name: "zoom",
+              url: "https://zoom.us",
+              icon: "brand-zoom",
+              icon_color: palette.blue,
+            },
+          ],
+        },
+        {
+          name: "code & repository",
           links: [
             {
               name: "github",
@@ -161,27 +154,15 @@ const default_configuration = {
               icon_color: palette.green,
             },
             {
-              name: "gitlab",
-              url: "https://gitlab.com",
-              icon: "brand-gitlab",
-              icon_color: palette.peach,
-            },
-            {
               name: "stackoverflow",
               url: "https://stackoverflow.com",
               icon: "brand-stackoverflow",
-              icon_color: palette.red,
-            },
-            {
-              name: "chatgpt",
-              url: "https://chatgpt.com",
-              icon: "brand-openai",
-              icon_color: palette.mauve,
+              icon_color: palette.peach,
             },
           ],
         },
         {
-          name: "cloud & devops",
+          name: "cloud, devops & docs",
           links: [
             {
               name: "vercel",
@@ -190,51 +171,16 @@ const default_configuration = {
               icon_color: palette.blue,
             },
             {
-              name: "cloudflare",
-              url: "https://dash.cloudflare.com",
-              icon: "brand-cloudflare",
-              icon_color: palette.peach,
-            },
-            {
-              name: "docker",
-              url: "https://hub.docker.com",
-              icon: "brand-docker",
-              icon_color: palette.blue,
-            },
-            {
-              name: "aws",
-              url: "https://aws.amazon.com/console",
-              icon: "brand-aws",
-              icon_color: palette.peach,
-            },
-          ],
-        },
-        {
-          name: "learn & practice",
-          links: [
-            {
-              name: "leetcode",
-              url: "https://leetcode.com",
-              icon: "code",
-              icon_color: palette.peach,
-            },
-            {
-              name: "hackernews",
-              url: "https://news.ycombinator.com",
-              icon: "brand-ycombinator",
+              name: "gcp",
+              url: "https://console.cloud.google.com",
+              icon: "cloud",
               icon_color: palette.red,
             },
             {
-              name: "dev.to",
-              url: "https://dev.to",
-              icon: "code",
+              name: "supabase",
+              url: "https://supabase.com/dashboard",
+              icon: "brand-supabase",
               icon_color: palette.green,
-            },
-            {
-              name: "mdn docs",
-              url: "https://developer.mozilla.org",
-              icon: "book-2",
-              icon_color: palette.mauve,
             },
           ],
         },
@@ -254,10 +200,10 @@ const default_configuration = {
               icon_color: palette.red,
             },
             {
-              name: "spotify",
-              url: "https://open.spotify.com",
-              icon: "brand-spotify",
-              icon_color: palette.green,
+              name: "yt music",
+              url: "https://music.youtube.com",
+              icon: "music",
+              icon_color: palette.red,
             },
             {
               name: "netflix",
@@ -274,13 +220,13 @@ const default_configuration = {
           ],
         },
         {
-          name: "socials",
+          name: "social & communities",
           links: [
             {
-              name: "reddit",
-              url: "https://www.reddit.com",
-              icon: "brand-reddit",
-              icon_color: palette.peach,
+              name: "facebook",
+              url: "https://www.facebook.com",
+              icon: "brand-facebook",
+              icon_color: palette.blue,
             },
             {
               name: "x / twitter",
@@ -303,7 +249,7 @@ const default_configuration = {
           ],
         },
         {
-          name: "gaming & hobby",
+          name: "gaming & leisure",
           links: [
             {
               name: "steam",
@@ -312,22 +258,10 @@ const default_configuration = {
               icon_color: palette.blue,
             },
             {
-              name: "goodreads",
-              url: "https://www.goodreads.com",
-              icon: "books",
-              icon_color: palette.peach,
-            },
-            {
               name: "pinterest",
               url: "https://www.pinterest.com",
               icon: "brand-pinterest",
               icon_color: palette.red,
-            },
-            {
-              name: "chess",
-              url: "https://www.chess.com",
-              icon: "chess",
-              icon_color: palette.green,
             },
           ],
         },
